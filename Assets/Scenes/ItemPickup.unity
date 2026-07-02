@@ -5373,6 +5373,10 @@ PrefabInstance:
       propertyPath: playerTransform
       value: 
       objectReference: {fileID: 544480782}
+    - target: {fileID: 8789450234712980830, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: groundLayer.m_Bits
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 8917391034459329229, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
       propertyPath: m_LocalPosition.x
       value: 6.969269
@@ -9840,6 +9844,14 @@ PrefabInstance:
       propertyPath: maxHealth
       value: 300
       objectReference: {fileID: 0}
+    - target: {fileID: 8789450234712980830, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: gravityMultiplier
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8789450234712980830, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: groundLayer.m_Bits
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 8917391034459329229, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
       propertyPath: m_LocalPosition.x
       value: -2.5330424
@@ -11640,6 +11652,14 @@ PrefabInstance:
       propertyPath: maxHealth
       value: 300
       objectReference: {fileID: 0}
+    - target: {fileID: 8789450234712980830, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: gravityMultiplier
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8789450234712980830, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: groundLayer.m_Bits
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 8917391034459329229, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
       propertyPath: m_LocalPosition.x
       value: 4.308783
@@ -11927,6 +11947,14 @@ PrefabInstance:
     - target: {fileID: 6351839981106544148, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
       propertyPath: maxHealth
       value: 300
+      objectReference: {fileID: 0}
+    - target: {fileID: 8789450234712980830, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: gravityMultiplier
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8789450234712980830, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: groundLayer.m_Bits
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 8917391034459329229, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
       propertyPath: m_LocalPosition.x
@@ -12667,37 +12695,15 @@ GameObject:
   - component: {fileID: 1667661204}
   - component: {fileID: 1667661203}
   - component: {fileID: 1667661202}
-  - component: {fileID: 1667661201}
   - component: {fileID: 1667661205}
+  - component: {fileID: 1667661206}
   m_Layer: 3
   m_Name: Ground
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!64 &1667661201
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1667661200}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!23 &1667661202
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -12800,8 +12806,29 @@ MonoBehaviour:
   m_OverrideVoxelSize: 0
   m_VoxelSize: 0.16666667
   m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 23800000, guid: f1d06ed622974734481b347890551fef, type: 2}
+  m_NavMeshData: {fileID: 23800000, guid: 3bccb2ed08a0bf549b8880ebf30d894c, type: 2}
   m_BuildHeightMesh: 0
+--- !u!65 &1667661206
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1667661200}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 0, y: -5, z: 0}
 --- !u!1 &1673389436
 GameObject:
   m_ObjectHideFlags: 0
@@ -13030,6 +13057,10 @@ PrefabInstance:
     - target: {fileID: 6351839981106544148, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
       propertyPath: maxHealth
       value: 300
+      objectReference: {fileID: 0}
+    - target: {fileID: 8789450234712980830, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: gravityMultiplier
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8789450234712980830, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
       propertyPath: groundLayer.m_Bits
@@ -13377,6 +13408,10 @@ PrefabInstance:
     - target: {fileID: 4825772630651691529, guid: 7af46b5cd3264aa4a8090f2900b5ef8a, type: 3}
       propertyPath: m_Enabled
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5445751405814295026, guid: 7af46b5cd3264aa4a8090f2900b5ef8a, type: 3}
+      propertyPath: verticalForce
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 5445751405814295026, guid: 7af46b5cd3264aa4a8090f2900b5ef8a, type: 3}
       propertyPath: impactVFXScale.x

@@ -30,7 +30,7 @@ public class EnemyKnockback : MonoBehaviour, IKnockbackable
     [SerializeField] private float verticalForce = 8f;
 
     [Tooltip("Optional multiplier applied to gravity while airborne. >1 = heavier fall.")]
-    [SerializeField] private float gravityMultiplier = 1.5f;
+    [SerializeField] private float gravityMultiplier = 1.0f;
 
     [Tooltip("Delay in seconds before the vertical launch force is applied (syncs to animation).")]
     [SerializeField] private float launchDelay = 0.05f;
@@ -59,6 +59,7 @@ public class EnemyKnockback : MonoBehaviour, IKnockbackable
 
     private bool isKnockbackActive = false;
     private Coroutine knockbackCoroutine;
+    private Vector3 preKnockbackPosition;
 
     public bool IsInKnockback => isKnockbackActive;
 
@@ -148,8 +149,10 @@ public class EnemyKnockback : MonoBehaviour, IKnockbackable
 
         isKnockbackActive = true;
 
-        // -- 1. DISABLE NavMeshAgent ------------------------------------------
-        // Fully disable: isStopped alone lets updatePosition=true fight physics.
+        // Store pre-knockback position as a safe fallback for NavMesh recovery
+        preKnockbackPosition = transform.position;
+
+        //  1. DISABLE NavMeshAgent 
         bool agentWasEnabled = false;
         if (navAgent != null && navAgent.isActiveAndEnabled)
         {
@@ -159,21 +162,29 @@ public class EnemyKnockback : MonoBehaviour, IKnockbackable
             navAgent.enabled = false;
         }
 
-        // -- 2. ENABLE Rigidbody physics --------------------------------------
+        //  2. ENABLE Rigidbody physics 
+        // Lift slightly above ground to prevent collider penetration
+        float groundLift = 0.05f;
+        transform.position += Vector3.up * groundLift;
+
         rb.isKinematic = false;
         rb.useGravity = true;
+        rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
 
-        // -- 3. Freeze animator during knockback ------------------------------
+        //  3. Freeze animator during knockback 
         if (animator != null) animator.speed = 0f;
 
-        // -- 4. Apply horizontal impulse immediately --------------------------
+        //  4. Apply horizontal impulse immediately 
         ForceMode forceMode = ignoreMass ? ForceMode.VelocityChange : ForceMode.Impulse;
         if (enableKnockback && hForce > 0f)
             rb.AddForce(dir * hForce, forceMode);
 
-        // -- 5. Apply vertical impulse (launch) after optional delay ----------
+        // Small upward nudge to counteract first-frame gravity and prevent ground sink
+        rb.linearVelocity += Vector3.up * 1.5f;
+
+        //  5. Apply vertical impulse (launch) after optional delay 
         if (isLaunch && vForce > 0f)
         {
             if (lDelay > 0f)
@@ -186,10 +197,10 @@ public class EnemyKnockback : MonoBehaviour, IKnockbackable
             }
         }
 
-        // -- 6. Wait for active force phase -----------------------------------
+        //  6. Wait for active force phase -
         yield return new WaitForSeconds(activeDuration);
 
-        // -- 7. GROUND DETECTION - wait until landing -------------------------
+        //  7. GROUND DETECTION - wait until landing -
         if (isLaunch)
         {
             float airTimer = 0f;
@@ -211,10 +222,12 @@ public class EnemyKnockback : MonoBehaviour, IKnockbackable
                 Debug.LogWarning($"[EnemyKnockback] {gameObject.name} ground timeout after {maxAirTime}s - forcing recovery.");
         }
 
-        // -- 8. Short recovery pause ------------------------------------------
+        //  8. Short recovery pause 
         yield return new WaitForSeconds(recoveryDelay);
 
-        // -- 9. RE-ENABLE NavMeshAgent with Warp to sync position -------------
+        //  9. RE-ENABLE NavMeshAgent with Warp to sync position
+        rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
+
         if (agentWasEnabled)
         {
             rb.linearVelocity = Vector3.zero;
@@ -231,14 +244,25 @@ public class EnemyKnockback : MonoBehaviour, IKnockbackable
             else
             {
                 NavMeshHit hit;
-                if (NavMesh.SamplePosition(transform.position, out hit, 3f, NavMesh.AllAreas))
+                // Try increasingly larger radii to find the NavMesh
+                if (NavMesh.SamplePosition(transform.position, out hit, 10f, NavMesh.AllAreas))
                 {
                     navAgent.Warp(hit.position);
                     Debug.Log($"[EnemyKnockback] {gameObject.name} warped to nearest NavMesh point.");
                 }
+                else if (NavMesh.SamplePosition(preKnockbackPosition, out hit, 5f, NavMesh.AllAreas))
+                {
+                    // Fallback: warp back to where the enemy was before knockback
+                    transform.position = hit.position;
+                    navAgent.Warp(hit.position);
+                    Debug.Log($"[EnemyKnockback] {gameObject.name} warped back to pre-knockback position.");
+                }
                 else
                 {
-                    Debug.LogWarning($"[EnemyKnockback] {gameObject.name} could not find NavMesh after knockback.");
+                    // Last resort: force warp to pre-knockback position even if not on NavMesh
+                    transform.position = preKnockbackPosition;
+                    navAgent.Warp(preKnockbackPosition);
+                    Debug.LogWarning($"[EnemyKnockback] {gameObject.name} force-warped to pre-knockback position (no NavMesh found).");
                 }
             }
         }
@@ -253,7 +277,7 @@ public class EnemyKnockback : MonoBehaviour, IKnockbackable
             }
         }
 
-        // -- 10. Resume animator ----------------------------------------------
+        //  10. Resume animator 
         if (animator != null) animator.speed = 1f;
 
         isKnockbackActive = false;
@@ -295,6 +319,7 @@ public class EnemyKnockback : MonoBehaviour, IKnockbackable
         {
             if (rb != null)
             {
+                rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
                 rb.linearVelocity = Vector3.zero;
                 rb.angularVelocity = Vector3.zero;
                 rb.isKinematic = true;
@@ -305,7 +330,23 @@ public class EnemyKnockback : MonoBehaviour, IKnockbackable
             {
                 navAgent.enabled = true;
                 if (navAgent.isOnNavMesh)
+                {
                     navAgent.Warp(transform.position);
+                }
+                else
+                {
+                    NavMeshHit hit;
+                    if (NavMesh.SamplePosition(transform.position, out hit, 10f, NavMesh.AllAreas))
+                    {
+                        navAgent.Warp(hit.position);
+                    }
+                    else
+                    {
+                        // Fallback: warp back to pre-knockback position
+                        transform.position = preKnockbackPosition;
+                        navAgent.Warp(preKnockbackPosition);
+                    }
+                }
             }
 
             if (animator != null) animator.speed = 1f;
