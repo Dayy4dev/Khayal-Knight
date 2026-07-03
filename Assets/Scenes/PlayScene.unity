@@ -4776,7 +4776,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonManager
   dungeonGenerator: {fileID: 634518726}
   playerTransform: {fileID: 1929026399}
-  bossRoomPrefab: {fileID: 789193209607343952, guid: 31c0a312b4c22604788876fce3318a87, type: 3}
+  bossRoomPrefabs: []
+  finalBossRoomPrefab: {fileID: 0}
+  toBeContinuedUI: {fileID: 0}
   spawnPointName: SpawnPoint
   fallbackOffset: {x: 0, y: 1, z: 0}
   transitionDelay: 0.5
@@ -10923,7 +10925,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIManager
   gameplayUI: {fileID: 2108304721}
-  inventoryUI: {fileID: 2018715806}
   pauseUI: {fileID: 0}
   gameOverUI: {fileID: 218464677}
 --- !u!224 &1572686748
@@ -11659,7 +11660,7 @@ MonoBehaviour:
   maxHpBuffText: {fileID: 1899237022}
   playerObject: {fileID: 1929026393}
   buffManager: {fileID: 1929026400}
-  inventoryAudioSource: {fileID: 0}
+  inventoryAudioSource: {fileID: 1221553389}
   openInventorySound: {fileID: 8300000, guid: a8cf559ba69379746ae86c445f54e917, type: 3}
   closeInventorySound: {fileID: 8300000, guid: 4d74d6686b5b09e4494f22517355c73d, type: 3}
 --- !u!114 &1703006494
