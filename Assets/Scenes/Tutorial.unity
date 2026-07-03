@@ -14684,27 +14684,26 @@ MonoBehaviour:
   gameplayDelay: 1.5
   backstorySequence:
   - storyIllustration: {fileID: 21300000, guid: 3b63bc8d0706e3640a8bf8aa3d116a51, type: 3}
-    dialogueText: Suatu hari, seorang pemuda menjalani hari yang sangat melelahkan
-      di tempat kerjanya. Sejak pagi, meja kerjanya terus dipenuhi tumpukan lembaran
-      tugas yang harus segera diselesaikan. Semakin lama ia bekerja, semakin banyak
-      pekerjaan baru yang datang tanpa henti. Tekanan yang terus menumpuk membuatnya
-      merasa burnout dan muak dengan rutinitas yang dijalaninya.
+    dialogueText: One day, a young man had an incredibly exhausting day at work.
+      Since morning, his desk had been piled high with tasks that needed immediate
+      attention. The longer he worked, the more new tasks kept piling up without
+      end. The constantly mounting pressure left him feeling burned out and completely
+      fed up with his routine.
   - storyIllustration: {fileID: 21300000, guid: c2131386c5fe4204d83ead3eb1e8eda3, type: 3}
-    dialogueText: Setelah jam kerja berakhir, ia pulang menggunakan kereta. Di sepanjang
-      perjalanan, ia hanya memandangi pemandangan di luar jendela sambil merenungkan
-      hidupnya. Hari-harinya dipenuhi pekerjaan dan tekanan, hingga ia merasa sudah
-      lama tidak meluangkan waktu untuk benar-benar menikmati hidup atau merasakan
-      kebahagiaan
+    dialogueText: After work finally ended, he took the train home. Throughout the
+      journey, he just stared out the window, reflecting on his life. His days were
+      so consumed by work and pressure that he realized it had been a long time since
+      he last took a moment to truly enjoy life or feel genuine happiness.
   - storyIllustration: {fileID: 21300000, guid: 18e8179ebda621f48859122d383699bf, type: 3}
-    dialogueText: Sesampainya di rumah, ia duduk sejenak di sofa ruang tamu. Di sebelah
-      kirinya terdapat sebuah boneka kardus, mainan yang dahulu selalu menemaninya
-      bermain semasa kecil. Tanpa berpikir panjang, ia mengambil boneka itu dan mulai
-      memainkannya.
+    dialogueText: Upon arriving at home, he sat for a moment on the living room sofa.
+      On his left, there was a cardboard doll, a toy that in the past always accompanied
+      him to play during his childhood. Without thinking long, he took the doll and
+      started playing with it.
   - storyIllustration: {fileID: 21300000, guid: b45880d06e85ac04189796c1a4bdda3b, type: 3}
-    dialogueText: ' Kenangan masa kecil yang penuh tawa dan tanpa beban kembali terlintas
-      di benaknya, mengingatkannya pada masa ketika kebahagiaan terasa begitu sederhana.
-      Tak lama kemudian, rasa lelah mengalahkan kesadarannya. Dengan boneka kardus
-      masih berada di pelukannya, ia tertidur di sofa.'
+    dialogueText: Childhood memories full of laughter and without burdens crossed
+      his mind again, reminding him of a time when happiness felt so simple. Not
+      long after, fatigue defeated his consciousness. With the cardboard doll still
+      in his embrace, he fell asleep on the sofa
 --- !u!4 &1375096195
 Transform:
   m_ObjectHideFlags: 0
