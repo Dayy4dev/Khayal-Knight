@@ -8,6 +8,12 @@ public class PlayerAttack : MonoBehaviour
     [Tooltip("Jeda waktu maksimal (detik) antar hit agar combo tidak ter-reset")]
     [SerializeField] private float comboResetDuration = 1.0f;
 
+    [Header("Knockback Settings")]
+    [SerializeField] private bool enableUnarmedKnockback = true;
+    [SerializeField] private bool applyVerticalForceToUnarmed = false;
+    [SerializeField] private bool enableSwordKnockback = false;
+    [SerializeField] private bool enableHammerKnockback = true;
+
     [Header("References")]
     [SerializeField] private PlayerHealth playerHealth;
 
@@ -209,10 +215,20 @@ public class PlayerAttack : MonoBehaviour
 
     public void ApplyKnockback(GameObject target, float verticalForce = 0f)
     {
-        if (target == null || currentWeaponData == null) return;
+        if (target == null) return;
+
+        string category = GetWeaponCategory(currentWeaponData);
+        
+        if (category == "Sword" && !enableSwordKnockback) return;
+        if (category == "Hammer" && !enableHammerKnockback) return;
+        if (category == "Unarmed" && !enableUnarmedKnockback) return;
+
+        if (category == "Unarmed" && !applyVerticalForceToUnarmed)
+        {
+            verticalForce = 0f;
+        }
 
         float force = 5f;
-        string category = GetWeaponCategory(currentWeaponData);
         if (category == "Hammer") force = 8f; 
 
         // Try NavMesh-aware knockback first
