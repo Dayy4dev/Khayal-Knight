@@ -691,7 +691,7 @@ MonoBehaviour:
   patrolRadius: 8
   damage: 10
   attackCooldown: 1.2
-  visionRange: 10
+  visionRange: 15
   engagementRange: 0.9
   enemyAudioSource: {fileID: 0}
   meleeAttackSound: {fileID: 0}
