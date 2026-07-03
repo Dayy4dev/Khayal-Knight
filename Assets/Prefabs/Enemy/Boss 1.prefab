@@ -3120,7 +3120,7 @@ MonoBehaviour:
   chargeSpeed: 8
   engagementRange: 3
   visionRange: 30
-  phase2Threshold: 0.5
+  phase2Threshold: 0.517
   phase2SpeedBonus: 2
   phase2SpawnIntervalBonus: 3
   healthBar: {fileID: 505768877341836158}

@@ -5746,7 +5746,7 @@ MonoBehaviour:
   - {fileID: 4998477944928547305, guid: 21e35bb0cf30ae7498f42de9973043cc, type: 3}
   - {fileID: 3042001795012262410, guid: 6bff1d4c09de98b44bce4d8a5cc761f7, type: 3}
   - {fileID: 6410530479195758066, guid: 5f4fd8ccf738e074d83e5d88d68e9500, type: 3}
-  finalBossRoomPrefab: {fileID: 0}
+  finalBossRoomPrefab: {fileID: 2239172894286850175, guid: 0787e9c8f0747c44e876588e35add5a2, type: 3}
   toBeContinuedUI: {fileID: 1870715884}
   spawnPointName: SpawnPoint
   fallbackOffset: {x: 0, y: 1, z: 0}
