@@ -9,13 +9,28 @@ public class TutorialManager : MonoBehaviour
 {
     public static TutorialManager Instance;
 
-    [Header("UI Dialog (Tinggal Drag)")]
+    [Header("UI Dialog Persona Style")]
     public GameObject dialoguePanel;
     public TextMeshProUGUI textNama;
     public TextMeshProUGUI textIsi;
-    public Image potretUI;
-    public Sprite wajahMC;
+    public GameObject nextIcon;
+
+    [Header("Slot Potret Terpisah (Kiri & Kanan)")]
+    public Image portraitLeftMC;    // Drag UI Image sebelah KIRI ke sini
+    public Image portraitRightGuide; // Drag UI Image sebelah KANAN ke sini
+
+    [Header("Referensi Sprite")]
+    public Sprite mcDiam;
+    public Sprite mcHeran;
     public Sprite wajahGuide;
+
+    [Header("Setting Efek Teks & Visual")]
+    [SerializeField] private float typingSpeed = 0.03f;
+    [SerializeField] private Color warnaAktif = Color.white;          // Terang (100% transparan)
+    [SerializeField] private Color warnaTidakAktif = new Color(0.5f, 0.5f, 0.5f, 1f); // Agak gelap/abu-abu
+    
+    private bool isTyping = false;
+    private string fullTextHolder = "";
 
     [Header("Grup Objek (Tinggal Drag)")]
     public GameObject itemsTutorial;
@@ -26,10 +41,9 @@ public class TutorialManager : MonoBehaviour
     public NavMeshAgent guideAgent;
     public Transform titikSenjata;
 
-    // ─── ANIMATOR REFERENSI ───
     [Header("Animation Settings")]
     [SerializeField] private Animator guideAnimator;
-    [SerializeField] private float rotationSpeed = 5f; // Kecepatan berputar Guide
+    [SerializeField] private float rotationSpeed = 5f;
 
     [Header("Status (Otomatis dari Script Lain)")]
     public bool sudahAmbilPedang = false;
@@ -37,7 +51,7 @@ public class TutorialManager : MonoBehaviour
     public bool sudahBuangSenjata = false;
     public int enemiesDefeated = 0;
 
-    private Transform playerTransform; // Menyimpan referensi Player otomatis
+    private Transform playerTransform;
 
     private void Awake() => Instance = this;
 
@@ -46,13 +60,17 @@ public class TutorialManager : MonoBehaviour
         if (itemsTutorial) itemsTutorial.SetActive(false);
         if (meleeGroup) meleeGroup.SetActive(false);
         if (rangedGroup) rangedGroup.SetActive(false);
+        if (nextIcon) nextIcon.SetActive(false);
+
+        // Sembunyikan gambar portrait di awal game sebelum dialog mulai
+        if (portraitLeftMC) portraitLeftMC.gameObject.SetActive(false);
+        if (portraitRightGuide) portraitRightGuide.gameObject.SetActive(false);
 
         if (guideAnimator == null && guideAgent != null)
         {
             guideAnimator = guideAgent.GetComponentInChildren<Animator>();
         }
 
-        // Cari Player secara otomatis menggunakan Tag
         GameObject playerObj = GameObject.FindWithTag("Player");
         if (playerObj != null)
         {
@@ -72,37 +90,29 @@ public class TutorialManager : MonoBehaviour
 
     private IEnumerator AlurTutorialMudah()
     {
-        // ─── INTERACTION 1 (AWAL GAME) ───
+        // ─── FASE 1: DIALOG AWAL ───
         if (guideAnimator != null)
         {
-            // Simpan arah hadap awal Guide sebelum tengok Player
             Quaternion arahSemula = guideAgent.transform.rotation;
+            if (playerTransform != null) yield return StartCoroutine(HadapTarget(playerTransform.position));
 
-            if (playerTransform != null)
-            {
-                // 1. Berputar menghadap Player
-                yield return StartCoroutine(HadapTarget(playerTransform.position));
-            }
-
-            // 2. Mainkan Animasi Ngobrol
             guideAnimator.SetTrigger("PlayInteract");
 
-            // --- FASE 1: DIALOG AWAL ---
-            // --- FASE 1: DIALOG AWAL ---
-            yield return StartCoroutine(TampilkanDialog("MC", "Huh? Where am I? Why are my old toys so colossally huge?!"));
-            yield return StartCoroutine(TampilkanDialog("MC", "Wait... you're my favorite toy from when I was a kid! You're alive?!"));
+            yield return StartCoroutine(TampilkanDialog("MC", "Huh? Where am I? Why are my old toys so colossally huge?!", "diam"));
+            yield return StartCoroutine(TampilkanDialog("MC", "Wait... you're my favorite toy from when I was a kid! You're alive?!", "heran"));
             yield return StartCoroutine(TampilkanDialog("Guide", "Welcome back to the Astral Playroom, partner! It's been a long time. Let's get you moving."));
 
-            // 3. Berputar balik ke arah semula sebelum mulai jalan
             yield return StartCoroutine(HadapArah(arahSemula));
         }
         else
         {
-            // Jika animator null, jalankan dialog biasa tanpa rotasi animasi
-            yield return StartCoroutine(TampilkanDialog("MC", "Huh? Where am I? Why are my old toys so colossally huge?!"));
-            yield return StartCoroutine(TampilkanDialog("MC", "Wait... you're my favorite toy from when I was a kid! You're alive?!"));
+            yield return StartCoroutine(TampilkanDialog("MC", "Huh? Where am I? Why are my old toys so colossally huge?!", "diam"));
+            yield return StartCoroutine(TampilkanDialog("MC", "Wait... you're my favorite toy from when I was a kid! You're alive?!", "heran"));
             yield return StartCoroutine(TampilkanDialog("Guide", "Welcome back to the Astral Playroom, partner! It's been a long time. Let's get you moving."));
         }
+
+        // Sembunyikan potret saat gameplay tutorial dimulai agar tidak menutupi layar
+        StatusPotret(false);
 
         // --- FASE 2: DETEKSI GERAK (WASD) ---
         SetInstruksiLayar("Guide", "Use WASD to walk around this old dreamscape. Follow me, the other toys have changed...");
@@ -139,108 +149,150 @@ public class TutorialManager : MonoBehaviour
 
         if (dialoguePanel != null) dialoguePanel.SetActive(false);
 
-        // --- FASE 5: DIALOG AKHIR ---
+        // --- FASE 5: DIALOG AKHIR ───
         SetInstruksiLayar("Guide", "Remember, press 1, 2, 3 to switch weapons. Unarmed makes you run faster to escape!");
         yield return new WaitForSeconds(4f);
 
-        // ─── INTERACTION 2 (SESAAT SEBELUM TRANSISI) ───
         if (guideAnimator != null)
         {
             Quaternion arahSemulaAkhir = guideAgent.transform.rotation;
+            if (playerTransform != null) yield return StartCoroutine(HadapTarget(playerTransform.position));
 
-            if (playerTransform != null)
-            {
-                // 1. Hadap Player lagi
-                yield return StartCoroutine(HadapTarget(playerTransform.position));
-            }
-
-            // 2. Mainkan Animasi Ngobrol Terakhir
             guideAnimator.SetTrigger("PlayInteract");
 
-            SetInstruksiLayar("Guide", "Your imagination built this place, but neglect twisted it. It's time to wake up. Let's move!");
-            yield return new WaitForSeconds(3f);
-
-            // 3. Kembalikan hadapannya
+            yield return StartCoroutine(TampilkanDialog("Guide", "Your imagination built this place, but neglect twisted it. It's time to wake up. Let's move!"));
+            
             yield return StartCoroutine(HadapArah(arahSemulaAkhir));
         }
         else
         {
-            SetInstruksiLayar("Guide", "Your imagination built this place, but neglect twisted it. It's time to wake up. Let's move!");
-            yield return new WaitForSeconds(3f);
+            yield return StartCoroutine(TampilkanDialog("Guide", "Your imagination built this place, but neglect twisted it. It's time to wake up. Let's move!"));
         }
+
+        // Matikan potret lagi di akhir game
+        StatusPotret(false);
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
         if (LevelManager.Instance != null)
-        {
             LevelManager.Instance.LoadScene("PlayScene", "CircleWipe");
-        }
         else
-        {
             SceneManager.LoadScene("PlayScene");
-        }
     }
 
-    private IEnumerator TampilkanDialog(string nama, string isi)
+    private IEnumerator TampilkanDialog(string nama, string isi, string namaWajah = "")
     {
-        UpdateUI(nama, isi);
-        yield return new WaitForSeconds(0.4f);
+        dialoguePanel.SetActive(true);
+        if (nextIcon) nextIcon.SetActive(false);
+        
+        textNama.text = nama;
+        AturVisualPortrait(nama, namaWajah); // Atur siapa yang terang/gelap dan ganti sprite
+
+        isTyping = true;
+        fullTextHolder = isi;
+        textIsi.text = "";
+
+        foreach (char huruf in isi.ToCharArray())
+        {
+            if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space))
+            {
+                textIsi.text = fullTextHolder;
+                break;
+            }
+            textIsi.text += huruf;
+            yield return new WaitForSeconds(typingSpeed);
+        }
+
+        isTyping = false;
+        if (nextIcon) nextIcon.SetActive(true);
+
+        yield return new WaitForSeconds(0.2f);
         yield return new WaitUntil(() => Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space));
     }
 
     private void SetInstruksiLayar(string nama, string isi)
     {
-        UpdateUI(nama, isi);
-    }
-
-    private void UpdateUI(string nama, string isi)
-    {
         dialoguePanel.SetActive(true);
+        if (nextIcon) nextIcon.SetActive(false);
         textNama.text = nama;
         textIsi.text = isi;
+        AturVisualPortrait(nama, "");
+    }
 
-        if (potretUI != null)
+    // ─── LOGIKA BARU: PENGATURAN DUA PORTRAIT (KIRI & KANAN) ───
+    private void AturVisualPortrait(string namaYangBicara, string namaWajahMC)
+    {
+        // 1. Jika MC yang bicara
+        if (namaYangBicara == "MC")
         {
-            if (nama == "MC" && wajahMC != null)
-                potretUI.sprite = wajahMC;
-            else if (nama == "Guide" && wajahGuide != null)
-                potretUI.sprite = wajahGuide;
+            if (portraitLeftMC != null)
+            {
+                portraitLeftMC.gameObject.SetActive(true);
+                portraitLeftMC.color = warnaAktif; // MC Terang
+
+                // Ganti ekspresi wajah MC
+                if (string.IsNullOrEmpty(namaWajahMC) || namaWajahMC == "diam")
+                    portraitLeftMC.sprite = mcDiam;
+                else if (namaWajahMC == "heran")
+                    portraitLeftMC.sprite = mcHeran;
+            }
+
+            // Guide dibikin agak gelap (kalau objeknya lagi aktif/ada)
+            if (portraitRightGuide != null && portraitRightGuide.gameObject.activeSelf)
+            {
+                portraitRightGuide.color = warnaTidakAktif;
+            }
+        }
+        // 2. Jika Guide yang bicara
+        else if (namaYangBicara == "Guide")
+        {
+            if (portraitRightGuide != null)
+            {
+                portraitRightGuide.gameObject.SetActive(true);
+                portraitRightGuide.color = warnaAktif; // Guide Terang
+                if (wajahGuide != null) portraitRightGuide.sprite = wajahGuide;
+            }
+
+            // MC dibikin agak gelap
+            if (portraitLeftMC != null && portraitLeftMC.gameObject.activeSelf)
+            {
+                portraitLeftMC.color = warnaTidakAktif;
+            }
         }
     }
 
-    // ─── LOGIKA BARU: COROUTINE ROTASI HALUS ───
+    // Fungsi pembantu untuk mematikan/menghidupkan kedua portrait sekaligus
+    private void StatusPotret(bool status)
+    {
+        if (portraitLeftMC) portraitLeftMC.gameObject.SetActive(status);
+        if (portraitRightGuide) portraitRightGuide.gameObject.SetActive(status);
+    }
 
-    // Mengubah rotasi Guide menghadap posisi target koordinat (Player)
+    // ─── COROUTINE ROTASI HALUS ───
     private IEnumerator HadapTarget(Vector3 posisiTarget)
     {
         if (guideAgent == null) yield break;
-
         Transform guideTransform = guideAgent.transform;
         Vector3 arahTarget = (posisiTarget - guideTransform.position);
-        arahTarget.y = 0; // Kunci sumbu Y agar Guide tidak mendongak ke atas/bawah jika tinggi Player beda
+        arahTarget.y = 0;
 
         if (arahTarget.sqrMagnitude > 0.001f)
         {
             Quaternion rotasiTarget = Quaternion.LookRotation(arahTarget);
-
-            // Berputar secara bertahap sampai sudutnya mendekati target (< 1 derajat)
             while (Quaternion.Angle(guideTransform.rotation, rotasiTarget) > 1f)
             {
                 guideTransform.rotation = Quaternion.Slerp(guideTransform.rotation, rotasiTarget, rotationSpeed * Time.deltaTime);
                 yield return null;
             }
-            guideTransform.rotation = rotasiTarget; // Sempurnakan sudutnya di akhir
+            guideTransform.rotation = rotasiTarget;
         }
     }
 
-    // Mengubah rotasi Guide kembali ke bentuk nilai Quaternion semula
     private IEnumerator HadapArah(Quaternion rotasiSemula)
     {
         if (guideAgent == null) yield break;
-
         Transform guideTransform = guideAgent.transform;
-
         while (Quaternion.Angle(guideTransform.rotation, rotasiSemula) > 1f)
         {
             guideTransform.rotation = Quaternion.Slerp(guideTransform.rotation, rotasiSemula, rotationSpeed * Time.deltaTime);

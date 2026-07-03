@@ -19,6 +19,8 @@ public class TutorialBackstory : MonoBehaviour
     [SerializeField] private float gameplayDelay = 1.5f;       // Jeda waktu diam setelah layar terbuka lagi
     [SerializeField] private List<StoryBlockTutorial> backstorySequence; // List data Gambar + Teks
 
+    
+
     private int currentLineIndex = 0;
     private bool isTyping = false;
 

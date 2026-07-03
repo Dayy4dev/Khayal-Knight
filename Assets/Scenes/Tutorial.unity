@@ -131,7 +131,7 @@ GameObject:
   - component: {fileID: 5995918}
   - component: {fileID: 5995917}
   m_Layer: 5
-  m_Name: Image
+  m_Name: Imageleft
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -153,9 +153,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -659.19, y: 50}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -345, y: 389.87}
+  m_SizeDelta: {x: 917.4133, y: 508.3035}
+  m_Pivot: {x: 0.49999982, y: 0.49999997}
 --- !u!114 &5995917
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -176,7 +176,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 57be5fc028a83ef40adc70de1c193369, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1830,8 +1830,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 4.3281, y: -363.57}
-  m_SizeDelta: {x: 1500.2565, y: 352.86}
+  m_AnchoredPosition: {x: 4.3281, y: -322}
+  m_SizeDelta: {x: 1500.2565, y: 211.0289}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &197407177
 MonoBehaviour:
@@ -1887,7 +1887,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
+  m_HorizontalAlignment: 2
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -3850,8 +3850,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -16.461731, y: -53.819427}
-  m_SizeDelta: {x: 1385.4567, y: 91.8988}
+  m_AnchoredPosition: {x: -6.5126953, y: -32}
+  m_SizeDelta: {x: 1297.6249, y: 139.1928}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &328950609
 MonoBehaviour:
@@ -3873,7 +3873,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Isi
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 30229c315c87ea640b257dbf70c90601, type: 2}
   m_sharedMaterial: {fileID: -2933209327128644239, guid: 30229c315c87ea640b257dbf70c90601, type: 2}
@@ -5553,9 +5553,15 @@ MonoBehaviour:
   dialoguePanel: {fileID: 727676952}
   textNama: {fileID: 804242550}
   textIsi: {fileID: 328950609}
-  potretUI: {fileID: 5995917}
-  wajahMC: {fileID: 21300000, guid: c7fdc0ef31c7d1649ab887b6927a9357, type: 3}
-  wajahGuide: {fileID: 21300000, guid: 99c591e9ded7a95439ea149b34717c84, type: 3}
+  nextIcon: {fileID: 0}
+  portraitLeftMC: {fileID: 5995917}
+  portraitRightGuide: {fileID: 1681936573}
+  mcDiam: {fileID: 21300000, guid: 57be5fc028a83ef40adc70de1c193369, type: 3}
+  mcHeran: {fileID: 21300000, guid: a15b5818b4069fd46a3ec06b86fd74cf, type: 3}
+  wajahGuide: {fileID: 21300000, guid: 707682aad1789ed4ea3f1f217d688c9b, type: 3}
+  typingSpeed: 0.03
+  warnaAktif: {r: 1, g: 1, b: 1, a: 1}
+  warnaTidakAktif: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   itemsTutorial: {fileID: 1880721964}
   meleeGroup: {fileID: 1036717873}
   rangedGroup: {fileID: 798158273}
@@ -8072,15 +8078,16 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 5995916}
   - {fileID: 328950608}
   - {fileID: 804242549}
-  - {fileID: 5995916}
+  - {fileID: 1681936572}
   m_Father: {fileID: 1703006491}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -135.43945, y: -408.6715}
-  m_SizeDelta: {x: -394.9399, y: -817.343}
+  m_AnchoredPosition: {x: -204.12817, y: -404.1673}
+  m_SizeDelta: {x: -514.301, y: -808.3347}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &727676954
 MonoBehaviour:
@@ -8632,6 +8639,10 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7532311079260015305, guid: 8c2fb4e96adfa884eb4f12ad6db84ddb, type: 3}
+      propertyPath: projectileDamage
+      value: 5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -8922,8 +8933,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -474, y: 31.998}
-  m_SizeDelta: {x: 270.3802, y: 63.9958}
+  m_AnchoredPosition: {x: -489.37262, y: 69.59451}
+  m_SizeDelta: {x: 264.864, y: 63.9958}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &804242550
 MonoBehaviour:
@@ -8945,7 +8956,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Nama
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 30229c315c87ea640b257dbf70c90601, type: 2}
   m_sharedMaterial: {fileID: -2933209327128644239, guid: 30229c315c87ea640b257dbf70c90601, type: 2}
@@ -10019,6 +10030,10 @@ PrefabInstance:
     - target: {fileID: 6737386667697142476, guid: 8c2fb4e96adfa884eb4f12ad6db84ddb, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7532311079260015305, guid: 8c2fb4e96adfa884eb4f12ad6db84ddb, type: 3}
+      propertyPath: projectileDamage
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -12706,7 +12721,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.715
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -13954,6 +13969,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1303998016}
   - component: {fileID: 1303998015}
+  - component: {fileID: 1303998017}
   m_Layer: 5
   m_Name: Volume
   m_TagString: Untagged
@@ -14047,6 +14063,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -0.30000305}
   m_SizeDelta: {x: 160, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1303998017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1303998014}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a7b2db4fe6cec743bb62f03b914e176, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VolumeSliderBridge
 --- !u!1001 &1309883355
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14656,9 +14684,27 @@ MonoBehaviour:
   gameplayDelay: 1.5
   backstorySequence:
   - storyIllustration: {fileID: 21300000, guid: 3b63bc8d0706e3640a8bf8aa3d116a51, type: 3}
-    dialogueText: SKIBIDIIIIIIIIIIIIIIIIIIIIIIIIHJWFBJFWWDA
-  - storyIllustration: {fileID: 21300000, guid: f48e21cb2f0b3e040a0ebbbdd2831875, type: 3}
-    dialogueText: asfgqwageshrtezdednf
+    dialogueText: Suatu hari, seorang pemuda menjalani hari yang sangat melelahkan
+      di tempat kerjanya. Sejak pagi, meja kerjanya terus dipenuhi tumpukan lembaran
+      tugas yang harus segera diselesaikan. Semakin lama ia bekerja, semakin banyak
+      pekerjaan baru yang datang tanpa henti. Tekanan yang terus menumpuk membuatnya
+      merasa burnout dan muak dengan rutinitas yang dijalaninya.
+  - storyIllustration: {fileID: 21300000, guid: c2131386c5fe4204d83ead3eb1e8eda3, type: 3}
+    dialogueText: Setelah jam kerja berakhir, ia pulang menggunakan kereta. Di sepanjang
+      perjalanan, ia hanya memandangi pemandangan di luar jendela sambil merenungkan
+      hidupnya. Hari-harinya dipenuhi pekerjaan dan tekanan, hingga ia merasa sudah
+      lama tidak meluangkan waktu untuk benar-benar menikmati hidup atau merasakan
+      kebahagiaan
+  - storyIllustration: {fileID: 21300000, guid: 18e8179ebda621f48859122d383699bf, type: 3}
+    dialogueText: Sesampainya di rumah, ia duduk sejenak di sofa ruang tamu. Di sebelah
+      kirinya terdapat sebuah boneka kardus, mainan yang dahulu selalu menemaninya
+      bermain semasa kecil. Tanpa berpikir panjang, ia mengambil boneka itu dan mulai
+      memainkannya.
+  - storyIllustration: {fileID: 21300000, guid: b45880d06e85ac04189796c1a4bdda3b, type: 3}
+    dialogueText: ' Kenangan masa kecil yang penuh tawa dan tanpa beban kembali terlintas
+      di benaknya, mengingatkannya pada masa ketika kebahagiaan terasa begitu sederhana.
+      Tak lama kemudian, rasa lelah mengalahkan kesadarannya. Dengan boneka kardus
+      masih berada di pelukannya, ia tertidur di sofa.'
 --- !u!4 &1375096195
 Transform:
   m_ObjectHideFlags: 0
@@ -15298,7 +15344,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 0.899
+  m_Volume: 0.73
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -17856,6 +17902,81 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 2378966673649085558, guid: 7a57a3bc78ed58d4db0ca9bd0898fc5d, type: 3}
+--- !u!1 &1681936571
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1681936572}
+  - component: {fileID: 1681936574}
+  - component: {fileID: 1681936573}
+  m_Layer: 5
+  m_Name: ImageRight
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1681936572
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1681936571}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 727676953}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 577.18, y: 257.87}
+  m_SizeDelta: {x: 251.3415, y: 244.2956}
+  m_Pivot: {x: 0.49999982, y: 0.49999997}
+--- !u!114 &1681936573
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1681936571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 707682aad1789ed4ea3f1f217d688c9b, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1681936574
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1681936571}
+  m_CullTransparentMesh: 1
 --- !u!1001 &1682046626
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -18183,11 +18304,11 @@ PrefabInstance:
     - target: {fileID: 3803412608342632589, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
       propertyPath: runFootstepSound
       value: 
-      objectReference: {fileID: 8300000, guid: 0394481c20cb56c46a1ed03c5e4a002b, type: 3}
+      objectReference: {fileID: 8300000, guid: 683b20bdbf800804f90f8442968584e9, type: 3}
     - target: {fileID: 3803412608342632589, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
       propertyPath: walkFootstepSound
       value: 
-      objectReference: {fileID: 8300000, guid: 2acd297ef919b1644b9d6cc5f8a5000a, type: 3}
+      objectReference: {fileID: 8300000, guid: 683b20bdbf800804f90f8442968584e9, type: 3}
     - target: {fileID: 3803412608342632589, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
       propertyPath: movementAudioSource
       value: 
@@ -18250,7 +18371,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.639
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -18428,7 +18549,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -826, y: 361}
+  m_AnchoredPosition: {x: 626, y: -343}
   m_SizeDelta: {x: 100, y: 27.7387}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1716972787
@@ -20731,7 +20852,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1962870761
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20921,7 +21042,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 829.81, y: -395}
+  m_AnchoredPosition: {x: 829.81, y: -142}
   m_SizeDelta: {x: 260.3712, y: 72.5816}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1988711329
@@ -21482,6 +21603,10 @@ PrefabInstance:
     - target: {fileID: 6737386667697142476, guid: 8c2fb4e96adfa884eb4f12ad6db84ddb, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7532311079260015305, guid: 8c2fb4e96adfa884eb4f12ad6db84ddb, type: 3}
+      propertyPath: projectileDamage
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
