@@ -11,6 +11,10 @@ public class PlayerInventory : MonoBehaviour
     [Header("Unarmed Weapon Data")]
     [SerializeField] private WeaponData unarmedData;
 
+    [Header("Starting Weapons")]
+    [SerializeField] private WeaponData balloonSwordData;
+    [SerializeField] private WeaponData handCannonData;
+
     [Header("References")]
     [SerializeField] private PlayerAttack playerAttack;
     [SerializeField] private Transform dropPoint;
@@ -25,7 +29,7 @@ public class PlayerInventory : MonoBehaviour
     [Header("Inventory Audio Settings")]
     [SerializeField] private AudioSource inventoryAudioSource;
 
-    [SerializeField] private AudioClip switchWeaponSound; // <- TAMBAHKAN VARIABEL BARU INI
+    [SerializeField] private AudioClip switchWeaponSound;
 
 
     private WeaponData[] slots = new WeaponData[TOTAL_SLOTS];
@@ -54,17 +58,33 @@ public class PlayerInventory : MonoBehaviour
             playerMovement = GetComponent<PlayerMovement>();
     }
 
-
     void Start()
     {
         allChildrenCache = GetComponentsInChildren<Transform>(true);
+
 
         if (unarmedData != null)
         {
             slots[SLOT_UNARMED] = unarmedData;
         }
 
-        EquipSlot(SLOT_UNARMED);
+
+        if (balloonSwordData != null)
+        {
+            slots[SLOT_WEAPON_1] = balloonSwordData;
+            onSlotChanged?.Invoke(SLOT_WEAPON_1, balloonSwordData);
+        }
+
+        if (handCannonData != null)
+        {
+            slots[SLOT_WEAPON_2] = handCannonData;
+            onSlotChanged?.Invoke(SLOT_WEAPON_2, handCannonData);
+        }
+
+        currentSlot = SLOT_WEAPON_1;
+        EquipSlot(SLOT_WEAPON_1);
+
+        onActiveSlotChanged?.Invoke(currentSlot);
     }
 
     void Update()
@@ -197,12 +217,11 @@ public class PlayerInventory : MonoBehaviour
             Vector3 spawnPos = dropPoint != null ? dropPoint.position : transform.position + transform.forward * 0.8f;
             if (dropPoint != null) spawnPos.y = dropPoint.position.y;
 
-            // 1. Instantiate senjata yang dijatuhkan
+
             GameObject dropped = Instantiate(data.pickupPrefab, spawnPos, Quaternion.identity);
 
             if (dropped.TryGetComponent<WeaponPickup>(out WeaponPickup wp)) wp.MarkAsDropped();
 
-            // 2. TAMBAHKAN LOGIKA INI: Jadikan item yang dijatuhkan sebagai child dari room saat ini
             if (DungeonManager.Instance != null)
             {
                 DungeonManager.Instance.ParentItemToCurrentRoom(dropped.transform);
@@ -221,25 +240,21 @@ public class PlayerInventory : MonoBehaviour
     {
         if (slotIndex < 0 || slotIndex >= TOTAL_SLOTS) return;
 
-        // Simpan slot lama untuk pengecekan apakah slotnya benar-benar berubah
+
         int oldSlot = currentSlot;
 
-        // 1. Simpan slot yang sedang aktif saat ini[cite: 2]
         currentSlot = slotIndex;
 
-        // 2. Serahkan seluruh tugas pencarian visual & hitbox ke EquipSlot[cite: 2]
         EquipSlot(slotIndex);
 
-        // TAMBAHKAN LOGIKA AUDIO INI:
-        // Putar suara jika slot yang dipilih berbeda dengan slot sebelumnya dan file audio telah di-assign
         if (oldSlot != currentSlot && inventoryAudioSource != null && switchWeaponSound != null)
         {
             inventoryAudioSource.PlayOneShot(switchWeaponSound);
         }
 
-        // 3. Jalankan event bawaan Unity Inventory kamu[cite: 2]
+
         onActiveSlotChanged?.Invoke(currentSlot);
-        onSlotChanged?.Invoke(currentSlot, slots[currentSlot]);  //[cite: 2]
+        onSlotChanged?.Invoke(currentSlot, slots[currentSlot]);
     }
     private void EquipSlot(int index)
     {
@@ -269,7 +284,7 @@ public class PlayerInventory : MonoBehaviour
         string weaponName = "";
         bool isWeaponActive = false;
 
-        // MATIKAN SENJATA LAMA SEBELUM MENCARI SENJATA BARU
+
         if (playerAttack != null)
         {
             Weapon oldWeapon = playerAttack.GetActiveWeapon();
@@ -281,7 +296,7 @@ public class PlayerInventory : MonoBehaviour
             if (child == null || child == transform) continue;
             string childName = child.gameObject.name.Replace("_", " ").Replace("  ", " ").ToLower();
 
-            // 1. Logika TanganAktif ("hand")
+
             if (childName.EndsWith("hand"))
             {
                 weaponName = childName.Substring(0, childName.Length - 4).Trim();
@@ -300,14 +315,13 @@ public class PlayerInventory : MonoBehaviour
                     {
                         if (w != null)
                         {
-                            foundWeaponComponent = w; // Menyimpan komponen senjata aktif dari tangan
+                            foundWeaponComponent = w;
                             break;
                         }
                     }
                 }
             }
 
-            // 2. Logika Pajangan Punggung ("back")
             if (childName.EndsWith("back"))
             {
                 weaponName = childName.Substring(0, childName.Length - 4).Trim();
@@ -320,7 +334,7 @@ public class PlayerInventory : MonoBehaviour
             }
         }
 
-        // --- PENGIRIMAN DATA UTAMA KE PLAYER ATTACK ---
+
         if (playerAttack != null)
         {
             playerAttack.SetWeaponHitbox(foundHitbox);
