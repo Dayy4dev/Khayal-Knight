@@ -190,7 +190,9 @@ public class DungeonManager : MonoBehaviour
             toBeContinuedUI.SetActive(true);
         }
         // Opsional: Kamu bisa mematikan input player atau mem-pause game di sini jika diperlukan
-        // Time.timeScale = 0f; 
+        Time.timeScale = 0f; 
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     public void OnPlayerEnterDoor(RoomType destination, GameObject player)

@@ -30,5 +30,5 @@ public class FloorManager : MonoBehaviour
 
     public float GetHPMultiplier() { return 1f + (CurrentFloor - 1) * 0.3f; }
     public float GetDamageMultiplier() { return 1f + (CurrentFloor - 1) * 0.2f; }
-    public float GetSpeedMultiplier() { return Mathf.Min(1f + (CurrentFloor - 1) * 0.1f, 1.5f);}
+    public float GetSpeedMultiplier() { return Mathf.Min(1f + (CurrentFloor - 1) * 0.1f, 1.5f); }
 }
