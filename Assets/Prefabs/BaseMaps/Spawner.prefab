@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccf14725db66ade44a0efc8bd0591eda, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
-  enemyPrefab: {fileID: 6077987226358072364, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+  enemyPrefab: {fileID: 4833465878070399267, guid: 8c2fb4e96adfa884eb4f12ad6db84ddb, type: 3}
   spawnCount: 3
   spawnRadius: 5
   groundLayer:

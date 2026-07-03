@@ -130,6 +130,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2249121731984557420, guid: 31c0a312b4c22604788876fce3318a87, type: 3}
+      propertyPath: 'enemies.Array.data[0]'
+      value: 
+      objectReference: {fileID: 1147379239309979957, guid: b7c367ba08429b341a49ebeddbcb9ea3, type: 3}
     - target: {fileID: 2581518497303494738, guid: 31c0a312b4c22604788876fce3318a87, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0

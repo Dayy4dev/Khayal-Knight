@@ -75,7 +75,7 @@ MonoBehaviour:
   autoDetectEnemies: 1
   enemyTag: Enemy
   enemies:
-  - {fileID: 7734134644095645850, guid: 62083466e61628a4982e852d4ca0b48c, type: 3}
+  - {fileID: 1147379239309979957, guid: b7c367ba08429b341a49ebeddbcb9ea3, type: 3}
 --- !u!114 &8152413506278259056
 MonoBehaviour:
   m_ObjectHideFlags: 0
