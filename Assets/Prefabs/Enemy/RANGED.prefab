@@ -690,7 +690,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 42382bcf0e305a04b81a469ecfa1cb33, type: 3}
       propertyPath: m_Name
-      value: RANGED 1
+      value: RANGED
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 42382bcf0e305a04b81a469ecfa1cb33, type: 3}
       propertyPath: m_Layer
@@ -958,6 +958,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: c8c31b8d9bc0dc342b0d41a0f194f663, type: 3}
   - {fileID: 8300000, guid: dab7edfe21dd8054cba9c1bf154eaf2c, type: 3}
   - {fileID: 8300000, guid: dc56b16cb71b8b34da8c0d39a495c9b5, type: 3}
+  enemyHurtSound: {fileID: 0}
   enemyDeathSound: {fileID: 8300000, guid: dc56b16cb71b8b34da8c0d39a495c9b5, type: 3}
 --- !u!114 &386744013346611649
 MonoBehaviour:
