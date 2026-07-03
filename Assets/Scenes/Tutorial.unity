@@ -16264,7 +16264,7 @@ MonoBehaviour:
   textSpeed: 0.05
   gameplayDelay: 1.5
   backstorySequence:
-  - storyIllustration: {fileID: 21300000, guid: 44e5857d8270faa4b91f150fad83bd1a, type: 3}
+  - storyIllustration: {fileID: 21300000, guid: 3b63bc8d0706e3640a8bf8aa3d116a51, type: 3}
     dialogueText: SKIBIDIIIIIIIIIIIIIIIIIIIIIIIIHJWFBJFWWDA
   - storyIllustration: {fileID: 21300000, guid: f48e21cb2f0b3e040a0ebbbdd2831875, type: 3}
     dialogueText: asfgqwageshrtezdednf
@@ -21747,6 +21747,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAttack
   comboResetDuration: 1
+  enableUnarmedKnockback: 1
+  applyVerticalForceToUnarmed: 0
+  enableSwordKnockback: 0
+  enableHammerKnockback: 1
   playerHealth: {fileID: 0}
   attackAudioSource: {fileID: 0}
   swordSounds:

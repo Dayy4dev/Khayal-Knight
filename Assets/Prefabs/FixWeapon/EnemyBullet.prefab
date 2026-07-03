@@ -51,7 +51,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 450430072447987941}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -126,7 +126,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e5a69a377e09ca438abe17ed8cd9188, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Bullet
-  weaponData: {fileID: 11400000, guid: 1c2e5f0c8eaf6f04a8174c3233d67d43, type: 2}
 --- !u!54 &7499162528336559557
 Rigidbody:
   m_ObjectHideFlags: 0

@@ -334,37 +334,51 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    public void TakeDamage(int amount)
+   public void TakeDamage(int amount)
     {
+        // Jika sudah mati, jangan proses damage lagi
         if (currentState == State.Dead) return;
 
         currentHealth -= amount;
+        Debug.Log($"[EnemyAI] Kena hit! Sisa HP: {currentHealth}");
 
-        // Memutar efek suara sakit acak dari array
+        // Memutar efek suara sakit acak
         if (hostileAudioSource != null && currentHealth > 0 && enemyHurtSounds != null && enemyHurtSounds.Length > 0)
         {
             AudioClip clip = enemyHurtSounds[Random.Range(0, enemyHurtSounds.Length)];
             if (clip != null) hostileAudioSource.PlayOneShot(clip);
         }
 
-        if (currentHealth <= 0) Die();
+        // Jika HP di bawah atau sama dengan 0, panggil fungsi Die
+        if (currentHealth <= 0) 
+        {
+            Die();
+        }
     }
 
     void Die()
     {
+        // Langsung kunci state ke Dead agar fungsi Update() berhenti memproses logic jalan/nembak
         currentState = State.Dead;
+        
+        Debug.LogWarning($"[EnemyAI] {gameObject.name} TELAH MATI! Memulai proses Destroy.");
+
         if (agent != null)
         {
             agent.isStopped = true;
-            agent.enabled = false;
+            agent.enabled = false; // Matikan NavMeshAgent agar tidak bisa geser-geser lagi
         }
 
         if (projectilePoolRoot != null) Destroy(projectilePoolRoot.gameObject);
 
+        // Matikan Collider agar peluru player tidak bisa menembak mayatnya lagi
         Collider col = GetComponent<Collider>();
         if (col != null) col.enabled = false;
 
-        float destroyDelay = 5f;
+        // --- PENGATURAN DELAY HANCUR ---
+        // Jika kamu punya animasi mati, biarkan 3f - 5f. 
+        // Jika TIDAK ADA animasi mati dan ingin musuh LANGSUNG HILANG, ubah angka 3f menjadi 0f
+        float destroyDelay = 3f; 
 
         // Memutar suara kematian
         if (hostileAudioSource != null && enemyDeathSound != null)
@@ -373,7 +387,14 @@ public class EnemyAI : MonoBehaviour
             destroyDelay = Mathf.Max(destroyDelay, enemyDeathSound.length);
         }
 
-        if (animator != null) animator.SetTrigger("Die");
+        if (animator != null) 
+        {
+            animator.SetTrigger("Die");
+        }
+
+        // Hancurkan GameObject musuh dari game
         Destroy(gameObject, destroyDelay);
     }
+
+  
 }

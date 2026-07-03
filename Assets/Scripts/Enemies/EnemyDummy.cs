@@ -81,8 +81,8 @@ public void TakeDamage(int amount)
     if (healthBar != null)
         healthBar.SetHealth(currentHealth);
 
-    if (audioSource != null && enemyHurtSound != null)
-        audioSource.PlayOneShot(enemyHurtSound);
+    if (audioSource != null && enemyHurtSounds != null)
+        audioSource.PlayOneShot(enemyHurtSounds[Random.Range(0, enemyHurtSounds.Length)]);
 
     if (!renderersCached) CacheRenderers();
 
@@ -101,7 +101,7 @@ public void TakeDamage(int amount)
 
         if (player.TryGetComponent<PlayerAttack>(out PlayerAttack pAttack))
         {
-            audioSource.PlayOneShot(randomHurtSound);
+            audioSource.PlayOneShot(enemyHurtSounds[Random.Range(0, enemyHurtSounds.Length)]);
         }
     }
     // ==========================================
