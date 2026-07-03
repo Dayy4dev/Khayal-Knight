@@ -11,8 +11,13 @@ public class DungeonManager : MonoBehaviour
     public DungeonGenerator dungeonGenerator;
     public Transform playerTransform;
 
-    [Header("Boss Floor")]
-    public GameObject bossRoomPrefab;   // Prefab khusus boss room, di-spawn di floor 4
+    [Header("Boss Floor Setup")]
+    // UBAH: Menggunakan Array untuk variasi Boss Room biasa[cite: 3]
+    public GameObject[] bossRoomPrefabs;
+    // TAMBAHAN: Prefab khusus untuk Final Boss di Lantai 25
+    public GameObject finalBossRoomPrefab;
+    // TAMBAHAN: UI Text atau Panel untuk menampilkan pesan To Be Continued
+    public GameObject toBeContinuedUI;
 
     [Header("Spawn Settings")]
     public string spawnPointName = "SpawnPoint";
@@ -22,21 +27,20 @@ public class DungeonManager : MonoBehaviour
     public float transitionDelay = 0.5f;
 
     [Header("Room UI Bar Setup")]
-    public RoomUIBar roomUIBar; // Tarik script UI Bar ke sini di Inspector
+    public RoomUIBar roomUIBar;
     public TextMeshProUGUI floorUIText;
     private int maxEnemiesInRoom = 0;
     private int currentEnemiesInRoom = 0;
 
     [Header("Partner Wildcard Setup")]
-    public GameObject partnerPrefab; // Seret Prefab Partner ke sini di Inspector
-    [Range(0, 100)] public float partnerSpawnChance = 40f; // Peluang muncul (40%)
+    public GameObject partnerPrefab;
+    [Range(0, 100)] public float partnerSpawnChance = 40f;
     [Header("Dungeon Audio Settings")]
     [SerializeField] private AudioSource dungeonAudioSource;
     [SerializeField] private AudioClip doorOpenSound;
     [SerializeField] private AudioClip roomEnterSound;
     [SerializeField] private AudioClip bossFloorEnterSound;
 
-    // Internal state
     private RoomController currentRoom;
     private Dictionary<RoomType, RoomController> roomMap = new Dictionary<RoomType, RoomController>();
     private RoomType currentRoomType = RoomType.Bottom;
@@ -52,10 +56,6 @@ public class DungeonManager : MonoBehaviour
     {
         StartCoroutine(InitializeDungeon());
     }
-
-    // ─────────────────────────────────────────
-    // INIT
-    // ─────────────────────────────────────────
 
     IEnumerator InitializeDungeon()
     {
@@ -82,10 +82,6 @@ public class DungeonManager : MonoBehaviour
         }
         Debug.Log($"[DungeonManager] {roomMap.Count} room terdaftar.");
     }
-
-    // ─────────────────────────────────────────
-    // CALLBACK DARI RoomController
-    // ─────────────────────────────────────────
 
     public void OnRoomCleared(RoomController room)
     {
@@ -144,9 +140,6 @@ public class DungeonManager : MonoBehaviour
         }
     }
 
-    // ───────────────────────────────────────────────────────────────────
-    // LOGIKA UTAMA PERBAIKAN PORTAL BOSS ROOM
-    // ───────────────────────────────────────────────────────────────────
     private void ExecuteRoomClearLogic(RoomController room)
     {
         LootboxRoomSpawner roomSpawner = room.GetComponentInChildren<LootboxRoomSpawner>();
@@ -155,12 +148,18 @@ public class DungeonManager : MonoBehaviour
             roomSpawner.SpawnRandomChest();
         }
 
-        // PERBAIKAN: Jika ini adalah Boss Floor, langsung aktifkan portal yang ada di ruangan ini!
         if (FloorManager.Instance != null && FloorManager.Instance.IsBossFloor)
         {
+            // TAMBAHAN: Jika ini adalah Boss Room lantai 25 dan berhasil dibersihkan/clear
+            if (FloorManager.Instance.CurrentFloor == 25)
+            {
+                TriggerToBeContinued();
+                return;
+            }
+
             Debug.Log("[DungeonManager] Boss Floor terdeteksi selesai. Mengaktifkan Portal di Boss Room.");
             ActivatePortalInRoom(room);
-            return; // Keluar agar tidak mengeksekusi switch-case RoomType.Bottom di bawah
+            return;
         }
 
         switch (room.roomType)
@@ -182,9 +181,17 @@ public class DungeonManager : MonoBehaviour
         }
     }
 
-    // ─────────────────────────────────────────
-    // CALLBACK DARI DoorController
-    // ─────────────────────────────────────────
+    // TAMBAHAN: Fungsi untuk menangani akhir game sementara
+    private void TriggerToBeContinued()
+    {
+        Debug.Log("[DungeonManager] FINAL BOSS KALAH! TO BE CONTINUED...");
+        if (toBeContinuedUI != null)
+        {
+            toBeContinuedUI.SetActive(true);
+        }
+        // Opsional: Kamu bisa mematikan input player atau mem-pause game di sini jika diperlukan
+        // Time.timeScale = 0f; 
+    }
 
     public void OnPlayerEnterDoor(RoomType destination, GameObject player)
     {
@@ -228,42 +235,33 @@ public class DungeonManager : MonoBehaviour
         TeleportPlayerToRoom(destination);
     }
 
-    // ─────────────────────────────────────────
-    // CALLBACK DARI NextMapPortal
-    // ─────────────────────────────────────────
-
     public void GoToNextMap()
     {
         StartCoroutine(LoadNextMap());
     }
 
-    // ─────────────────────────────────────────
-    // HELPERS
-    // ─────────────────────────────────────────
-
     void OpenExitDoorsOfRoom(RoomType type)
     {
         bool doorUnlocked = false;
 
-        if (roomMap.TryGetValue(type, out RoomController room)) //
+        if (roomMap.TryGetValue(type, out RoomController room))
         {
-            foreach (var door in room.exitDoors) //[cite: 6]
+            foreach (var door in room.exitDoors)
             {
-                if (door != null) //[cite: 6]
+                if (door != null)
                 {
-                    door.UnlockDoor(); //[cite: 6]
-                    doorUnlocked = true; // Tandai bahwa ada pintu yang berhasil terbuka
+                    door.UnlockDoor();
+                    doorUnlocked = true;
                 }
             }
         }
 
-        // TAMBAHKAN LOGIKA AUDIO INI:
-        // Jika ada pintu yang terbuka, mainkan efek suara doorOpen
         if (doorUnlocked && dungeonAudioSource != null && doorOpenSound != null)
         {
             dungeonAudioSource.PlayOneShot(doorOpenSound);
         }
     }
+
     void ActivatePortalInRoom(RoomController room)
     {
         NextMapPortal portal = room.GetComponentInChildren<NextMapPortal>(true);
@@ -278,7 +276,7 @@ public class DungeonManager : MonoBehaviour
         }
     }
 
-   void TeleportPlayerToRoom(RoomType type)
+    void TeleportPlayerToRoom(RoomType type)
     {
         if (playerTransform == null) { Debug.LogWarning("[DungeonManager] playerTransform belum di-assign!"); return; }
         if (!roomMap.TryGetValue(type, out RoomController room)) { Debug.LogWarning($"[DungeonManager] Room {type} tidak ditemukan!"); return; }
@@ -300,15 +298,12 @@ public class DungeonManager : MonoBehaviour
         currentRoomType = type;
         Debug.Log($"[DungeonManager] Player diteleport ke {type}.");
 
-        // --- TAMBAHAN KODE AUDIO MASUK ROOM ---
         if (dungeonAudioSource != null && roomEnterSound != null)
         {
             dungeonAudioSource.PlayOneShot(roomEnterSound);
         }
-        // --------------------------------------
 
         EnemySpawner spawner = room.GetComponentInChildren<EnemySpawner>();
-        // ... (sisa kode di bawahnya tetap sama)
         if (spawner != null)
         {
             spawner.SpawnEnemies();
@@ -383,19 +378,17 @@ public class DungeonManager : MonoBehaviour
 
         yield return null;
 
-      bool isBossFloor = FloorManager.Instance != null && FloorManager.Instance.IsBossFloor;
+        bool isBossFloor = FloorManager.Instance != null && FloorManager.Instance.IsBossFloor;
 
-        if (isBossFloor && bossRoomPrefab != null)
+        if (isBossFloor)
         {
             Debug.Log("[DungeonManager] BOSS FLOOR! Spawning boss room...");
             SpawnBossRoom();
-            
-            // --- TAMBAHAN KODE AUDIO BOSS FLOOR ---
+
             if (dungeonAudioSource != null && bossFloorEnterSound != null)
             {
                 dungeonAudioSource.PlayOneShot(bossFloorEnterSound);
             }
-            // --------------------------------------
         }
         else
         {
@@ -414,10 +407,38 @@ public class DungeonManager : MonoBehaviour
         Debug.Log("[DungeonManager] Map baru loaded!");
     }
 
+    // MODIFIKASI: Menangani spawn acak prefab boss biasa atau prefab final boss
+    // MODIFIKASI: Menangani spawn acak prefab boss, final boss, serta mengubah ukurannya menjadi 60, 1, 60
     void SpawnBossRoom()
     {
-        GameObject bossRoomObj = Instantiate(bossRoomPrefab, Vector3.zero, Quaternion.identity);
-        bossRoomObj.name = "BossRoom";
+        int currentFloor = FloorManager.Instance != null ? FloorManager.Instance.CurrentFloor : 1;
+        GameObject selectedPrefab = null;
+
+        // 1. Cek apakah ini lantai final boss
+        if (currentFloor == 25)
+        {
+            selectedPrefab = finalBossRoomPrefab;
+            Debug.Log("[DungeonManager] Memilih prefab FINAL BOSS untuk lantai 25.");
+        }
+        else if (bossRoomPrefabs != null && bossRoomPrefabs.Length > 0)
+        {
+            // Ambil acak dari list variasi boss biasa
+            int randomIndex = UnityEngine.Random.Range(0, bossRoomPrefabs.Length);
+            selectedPrefab = bossRoomPrefabs[randomIndex];
+            Debug.Log($"[DungeonManager] Memilih variasi boss room index ke-{randomIndex}.");
+        }
+
+        if (selectedPrefab == null)
+        {
+            Debug.LogError("[DungeonManager] Prefab Boss Room belum di-assign di Inspector!");
+            return;
+        }
+
+        // 2. Spawn prefab boss room
+        GameObject bossRoomObj = Instantiate(selectedPrefab, Vector3.zero, Quaternion.identity);
+        bossRoomObj.name = (currentFloor == 25) ? "FinalBossRoom" : "BossRoom";
+
+
 
         RoomController roomCtrl = bossRoomObj.GetComponent<RoomController>();
         if (roomCtrl != null)
@@ -427,63 +448,64 @@ public class DungeonManager : MonoBehaviour
         }
     }
 
-   public void RefreshRoomEnemyCounter(RoomType type, GameObject roomObject)
-{
-    EnemySpawner spawner = roomObject.GetComponentInChildren<EnemySpawner>();
-
-    if (spawner != null)
+    public void RefreshRoomEnemyCounter(RoomType type, GameObject roomObject)
     {
-        maxEnemiesInRoom = spawner.spawnCount;
-    }
-    else
-    {
-        maxEnemiesInRoom = 0;
-    }
+        EnemySpawner spawner = roomObject.GetComponentInChildren<EnemySpawner>();
 
-    currentEnemiesInRoom = maxEnemiesInRoom;
-
-    Debug.Log($"[DungeonManager] Room {type} sukses disinkronkan. Total musuh: {maxEnemiesInRoom}");
-
-    if (maxEnemiesInRoom > 0)
-    {
-        if (roomUIBar != null)
+        if (spawner != null)
         {
-            roomUIBar.ShowBar(true);
-            
-            // ──────────────────────────────────────────────────────────────
-            // PERBAIKAN LOGIKA TEKS UI:
-            // Jika saat ini adalah Boss Floor, paksa tulisan menjadi "Boss Room"
-            if (FloorManager.Instance != null && FloorManager.Instance.IsBossFloor)
-            {
-                roomUIBar.UpdateRoomText("Boss Room");
-            }
-            else
-            {
-                roomUIBar.UpdateRoomText(type.ToString());
-            }
-            // ──────────────────────────────────────────────────────────────
-
-            roomUIBar.UpdateBarValue(currentEnemiesInRoom, maxEnemiesInRoom);
+            maxEnemiesInRoom = spawner.spawnCount;
+        }
+        else
+        {
+            maxEnemiesInRoom = 0;
         }
 
-        if (currentRoom != null && currentRoom.exitDoors != null)
+        currentEnemiesInRoom = maxEnemiesInRoom;
+
+        Debug.Log($"[DungeonManager] Room {type} sukses disinkronkan. Total musuh: {maxEnemiesInRoom}");
+
+        if (maxEnemiesInRoom > 0)
         {
-            foreach (var door in currentRoom.exitDoors)
+            if (roomUIBar != null)
             {
-                if (door != null)
+                roomUIBar.ShowBar(true);
+
+                if (FloorManager.Instance != null && FloorManager.Instance.IsBossFloor)
                 {
-                    door.LockDoor();
-                    Debug.Log($"[DungeonManager] Kunci pengaman dipaksa AKTIF pada: {door.name}");
+                    // Teks UI kustom untuk lantai 25
+                    if (FloorManager.Instance.CurrentFloor == 25)
+                        roomUIBar.UpdateRoomText("FINAL BOSS");
+                    else
+                        roomUIBar.UpdateRoomText("Boss Room");
+                }
+                else
+                {
+                    roomUIBar.UpdateRoomText(type.ToString());
+                }
+
+                roomUIBar.UpdateBarValue(currentEnemiesInRoom, maxEnemiesInRoom);
+            }
+
+            if (currentRoom != null && currentRoom.exitDoors != null)
+            {
+                foreach (var door in currentRoom.exitDoors)
+                {
+                    if (door != null)
+                    {
+                        door.LockDoor();
+                        Debug.Log($"[DungeonManager] Kunci pengaman dipaksa AKTIF pada: {door.name}");
+                    }
                 }
             }
         }
+        else
+        {
+            if (roomUIBar != null) roomUIBar.ShowBar(false);
+            OpenExitDoorsOfRoom(type);
+        }
     }
-    else
-    {
-        if (roomUIBar != null) roomUIBar.ShowBar(false);
-        OpenExitDoorsOfRoom(type);
-    }
-}
+
     public void OnEnemyKilled()
     {
         currentEnemiesInRoom--;
@@ -500,7 +522,11 @@ public class DungeonManager : MonoBehaviour
         if (floorUIText != null)
         {
             int floorSekarang = FloorManager.Instance != null ? FloorManager.Instance.CurrentFloor : 1;
-            if (floorSekarang % 4 == 0)
+            if (floorSekarang == 25)
+            {
+                floorUIText.text = "FINAL FLOOR";
+            }
+            else if (floorSekarang % 4 == 0)
             {
                 floorUIText.text = "Boss Floor ";
             }
@@ -510,12 +536,11 @@ public class DungeonManager : MonoBehaviour
             }
         }
     }
-    // Taruh ini di bagian bawah DungeonManager.cs sebelum kurung kurawal tutup terakhir
+
     public void ParentItemToCurrentRoom(Transform itemTransform)
     {
         if (currentRoom != null)
         {
-            // Menjadikan item sebagai child dari ruangan saat ini
             itemTransform.SetParent(currentRoom.transform);
         }
         else

@@ -4,13 +4,11 @@ public class FloorManager : MonoBehaviour
 {
     public static FloorManager Instance { get; private set; }
 
-    // Hapus variabel: public int bossFloor = 4;
-
     // Floor saat ini, mulai dari 1
     public int CurrentFloor { get; private set; } = 1;
 
-    // UBAH DI SINI: Menggunakan Modulo (%) agar setiap kelipatan 4 jadi boss floor
-    public bool IsBossFloor => CurrentFloor % 4 == 0;
+    // UBAH DI SINI: Deteksi kelipatan 4 ATAU floor 25 sebagai Boss Floor[cite: 4]
+    public bool IsBossFloor => (CurrentFloor % 4 == 0) || (CurrentFloor == 25);
 
     void Awake()
     {
@@ -30,9 +28,7 @@ public class FloorManager : MonoBehaviour
         Debug.Log("[FloorManager] Floor direset ke 1.");
     }
 
-    // Scaling stat musuh akan otomatis terus meningkat tanpa batas seiring naiknya floor
     public float GetHPMultiplier() { return 1f + (CurrentFloor - 1) * 0.3f; }
     public float GetDamageMultiplier() { return 1f + (CurrentFloor - 1) * 0.2f; }
     public float GetSpeedMultiplier() { return Mathf.Min(1f + (CurrentFloor - 1) * 0.1f, 1.5f);}
-    
 }
