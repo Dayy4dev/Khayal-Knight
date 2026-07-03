@@ -9735,7 +9735,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 42382bcf0e305a04b81a469ecfa1cb33, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.33
+      value: 0.106
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 42382bcf0e305a04b81a469ecfa1cb33, type: 3}
       propertyPath: m_LocalPosition.z
@@ -10006,11 +10006,11 @@ MonoBehaviour:
   projectilePrefab: {fileID: 450430072447987941, guid: fb48896fb520a9a4e9ed0ed5f1dedae6, type: 3}
   firePoint: {fileID: 1184829602}
   chaseSpeed: 3.5
-  stopChaseDistance: 1.5
-  retreatDistance: 3
+  stopChaseDistance: 7.96
+  retreatDistance: 2
   retreatStepDistance: 4
   faceTargetWhileMoving: 1
-  shootRange: 5
+  shootRange: 13.36
   fireRate: 1.5
   maxHealth: 100
 --- !u!195 &1282555031

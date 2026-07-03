@@ -7,11 +7,11 @@ using UnityEngine.AI;
 [RequireComponent(typeof(Animator))]
 public class EnemyAI : MonoBehaviour
 {
-    public enum State { Chase, Retreat, AttackAirplane, Dead }
+    public enum State { Chase, Retreat, AttackPlayer, AttackAirplane, Dead }
     public State currentState = State.Chase;
 
     [Header("References")]
-    public Transform player;              // auto-cari via tag "Player" kalau kosong
+    public Transform player;              // auto-cari via taag "Player" kalau kosong
     public Transform airplaneTarget;       // auto-cari via tag "Airplane" kalau kosong
     public GameObject projectilePrefab;
     public Transform firePoint;
@@ -65,7 +65,11 @@ void Update()
 {
     if (currentState == State.Dead) return;
 
-    fireCooldown -= Time.deltaTime;
+    // Paksa cooldown berkurang setiap frame
+    if (fireCooldown > 0)
+    {
+        fireCooldown -= Time.deltaTime;
+    }
 
     // 1. Ambil jarak ke player
     float distToPlayer = player != null ? Vector3.Distance(transform.position, player.position) : float.MaxValue;
@@ -73,37 +77,82 @@ void Update()
     // 2. PRIORITAS UTAMA: Interaksi dengan Player
     if (player != null && distToPlayer < retreatDistance)
     {
-        // Player terlalu dekat -> Mundur!
         Retreat();
     }
-    else if (player != null && distToPlayer <= 15f) // Jika player masuk dalam jangkauan radar (15 unit)
+    else if (player != null && distToPlayer <= shootRange)
     {
         if (distToPlayer > stopChaseDistance)
         {
-            // Jika di luar jarak serang player -> WAJIB KEJAR PLAYER!
             ChasePlayer(distToPlayer);
         }
         else
         {
-            // Jika sudah menempel dengan player -> Diam menghadap player
-            currentState = State.Chase;
-            agent.isStopped = true;
-            if (faceTargetWhileMoving) FaceTarget(player.position);
+            // Sudah dalam jarak tembak & tidak terlalu dekat/jauh -> tembak player
+            ShootPlayer();
         }
     }
-    // 3. PRIORITAS KEDUA: Jika Player jauh (di luar 15 unit), baru serang pesawat
+    // 3. PRIORITAS KEDUA: Menyerang Pesawat jika Player jauh
     else if (airplaneTarget != null && Vector3.Distance(transform.position, airplaneTarget.position) <= shootRange)
     {
         AttackAirplane();
     }
-    // 4. Jika semua target tidak ada / jauh
     else
     {
         currentState = State.Chase;
-        agent.isStopped = true; // Diam di tempat
+        agent.isStopped = true; 
     }
 
     UpdateAnimator();
+}
+
+void AttackAirplane()
+{
+    currentState = State.AttackAirplane;
+    agent.isStopped = true; 
+
+    FaceTarget(airplaneTarget.position);
+
+    // LOG UNTUK UTING: Cek apakah kode masuk ke fungsi serang pesawat
+    Debug.Log($"Mencoba Menyerang Pesawat. Cooldown Saat Ini: {fireCooldown}");
+
+    if (fireCooldown <= 0f)
+    {
+        Shoot();
+        fireCooldown = fireRate; // Reset cooldown (misal 1.5 detik)
+    }
+}
+
+void ShootPlayer()
+{
+    currentState = State.AttackPlayer;
+    agent.isStopped = true;
+
+    FaceTarget(player.position);
+
+    Debug.Log($"Mencoba Menyerang Player. Cooldown Saat Ini: {fireCooldown}");
+
+    if (fireCooldown <= 0f)
+    {
+        Shoot(player);
+        fireCooldown = fireRate;
+    }
+}
+
+void Shoot(Transform target = null)
+{
+    // LOG UNTUK UTING: Mengonfirmasi fungsi tembak C# berjalan
+    Debug.LogWarning("KODE C# FIRING: MEMICU ANIMATOR SHOOT SEKARANG!");
+
+    animator.SetTrigger("Shoot");
+
+    if (projectilePrefab != null && firePoint != null)
+    {
+        GameObject proj = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+        ProjectilePlane p = proj.GetComponent<ProjectilePlane>();
+        // Kalau target eksplisit dikasih (misal player), pakai itu.
+        // Kalau tidak, default ke airplaneTarget (dipakai AttackAirplane).
+        if (p != null) p.SetTarget(target != null ? target : airplaneTarget);
+    }
 }
 
 // HAPUS dua fungsi ChasePlayer() yang lama, dan gunakan satu fungsi ini saja:
@@ -116,19 +165,7 @@ void ChasePlayer(float dist)
     if (faceTargetWhileMoving) FaceTarget(player.position);
 }
 
-void AttackAirplane()
-{
-    currentState = State.AttackAirplane;
-    agent.isStopped = true; // Diam saat menembak pesawat
 
-    FaceTarget(airplaneTarget.position);
-
-    if (fireCooldown <= 0f)
-    {
-        Shoot();
-        fireCooldown = fireRate;
-    }
-}
     void ChasePlayer()
     {
         float dist = Vector3.Distance(transform.position, player.position);
@@ -178,18 +215,7 @@ void AttackAirplane()
         transform.rotation = Quaternion.Slerp(transform.rotation, look, Time.deltaTime * 5f);
     }
 
-    void Shoot()
-    {
-        animator.SetTrigger("Shoot");
-
-        if (projectilePrefab != null && firePoint != null)
-        {
-            GameObject proj = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
-            ProjectilePlane p = proj.GetComponent<ProjectilePlane>();
-            if (p != null) p.SetTarget(airplaneTarget);
-        }
-    }
-
+    
     void UpdateAnimator()
 {
     if (currentState == State.Retreat)
