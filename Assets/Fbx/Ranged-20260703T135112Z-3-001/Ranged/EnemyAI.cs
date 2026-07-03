@@ -1,185 +1,139 @@
-    using UnityEngine;
+using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.AI;
 
-// Taruh script ini di GameObject karakter RANGED.
-// Wajib ada komponen: NavMeshAgent, Animator, Collider.
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(Animator))]
 public class EnemyAI : MonoBehaviour
 {
     public enum State { Chase, Retreat, AttackPlayer, AttackAirplane, Dead }
+    [Header("Status")]
     public State currentState = State.Chase;
 
     [Header("References")]
-    public Transform player;              // auto-cari via taag "Player" kalau kosong
-    public Transform airplaneTarget;       // auto-cari via tag "Airplane" kalau kosong
-    public GameObject projectilePrefab;
-    public Transform firePoint;
+    public NavMeshAgent agent;
+    public Animator animator;
+    public Transform player;              // Auto-cari via tag "Player" jika kosong
+    public Transform airplaneTarget;      // Auto-cari via tag "Airplane" jika kosong
+    public Transform firePoint;           // Tempat moncong senjata (Canon)
+    public GameObject projectilePrefab;   // Prefab peluru (EnemyBullet)
 
-    [Header("Chase Settings")]
-    public float chaseSpeed = 3.5f;
-    public float stopChaseDistance = 1.5f;   // jarak berhenti mendekat (nyaman menyerang)
-    public float retreatDistance = 3f;       // kalau player lebih dekat dari ini -> mundur
-    public float retreatStepDistance = 4f;   // seberapa jauh mundur tiap kali cari titik mundur
-    public bool faceTargetWhileMoving = true; // hadap player terus walau lagi mundur (biar natural)
+    [Header("Layers")]
+    public LayerMask terrainLayer;
 
-    [Header("Shoot Settings")]
-    public float shootRange = 15f;
-    public float fireRate = 1.5f;
-    private float fireCooldown;
-
-    [Header("Health")]
+    [Header("Stats")]
     public int maxHealth = 100;
+    public int projectileDamage = 20;
     private int currentHealth;
 
-    private NavMeshAgent agent;
-    private Animator animator;
+    [Header("Chase & Retreat Settings")]
+    public float chaseSpeed = 3.5f;
+    public float stopChaseDistance = 1.5f;   // Jarak berhenti mendekat (nyaman menyerang)
+    public float retreatDistance = 3f;       // Jika player lebih dekat dari ini -> mundur
+    public float retreatStepDistance = 4f;   // Seberapa jauh mundur
+    public bool faceTargetWhileMoving = true; // Menghadap player terus walau sedang mundur
+
+    [Header("Combat Settings")]
+    public float attackCooldown = 1f;        // Menggantikan fireRate agar mirip HostileAI
+    private bool isOnAttackCooldown = false;
+    public float projectileSpeed = 20f;
+    public float accuracyError = 0.5f;       // 0 = tepat, makin tinggi makin meleset
+    public bool usePrediction = true;        // Mengaktifkan fitur prediksi arah gerak target
+    public int projectilePoolSize = 10;
+    public float projectileLifetime = 3f;
+
+    [Header("Shoot Settings (Detection)")]
+    public float shootRange = 15f;           // Menggantikan engagementRange dari script lamamu
+
+    [Header("Audio")]
+    public AudioSource hostileAudioSource;
+    public AudioClip rangedShootSound;
+    public AudioClip[] enemyHurtSounds;
+    public AudioClip enemyDeathSound;
+
+    // Object Pooling untuk menghemat memori
+    private readonly Queue<GameObject> projectilePool = new Queue<GameObject>();
+    private Transform projectilePoolRoot;
 
     void Awake()
     {
-        agent = GetComponent<NavMeshAgent>();
-        animator = GetComponent<Animator>();
+        if (agent == null) agent = GetComponent<NavMeshAgent>();
+        if (animator == null) animator = GetComponent<Animator>();
+        if (hostileAudioSource == null) hostileAudioSource = GetComponent<AudioSource>();
+
         currentHealth = maxHealth;
+
+        // Inisialisasi sistem Object Pool Peluru seperti di HostileAI
+        InitializeProjectilePool();
     }
 
     void Start()
     {
         if (player == null)
         {
-            var p = GameObject.FindGameObjectWithTag("Player");
-            if (p != null) player = p.transform;
+            GameObject playerObj = GameObject.FindWithTag("Player");
+            if (playerObj != null) player = playerObj.transform;
         }
         if (airplaneTarget == null)
         {
-            var a = GameObject.FindGameObjectWithTag("Airplane");
-            if (a != null) airplaneTarget = a.transform;
+            GameObject airplaneObj = GameObject.FindWithTag("Airplane");
+            if (airplaneObj != null) airplaneTarget = airplaneObj.transform;
         }
-        agent.speed = chaseSpeed;
 
-        // Rotasi diatur manual (bukan oleh NavMeshAgent) supaya karakter
-        // bisa tetap menghadap player walau sedang mundur.
-        agent.updateRotation = !faceTargetWhileMoving;
-    }
-
-void Update()
-{
-    if (currentState == State.Dead) return;
-
-    // Paksa cooldown berkurang setiap frame
-    if (fireCooldown > 0)
-    {
-        fireCooldown -= Time.deltaTime;
-    }
-
-    // 1. Ambil jarak ke player
-    float distToPlayer = player != null ? Vector3.Distance(transform.position, player.position) : float.MaxValue;
-
-    // 2. PRIORITAS UTAMA: Interaksi dengan Player
-    if (player != null && distToPlayer < retreatDistance)
-    {
-        Retreat();
-    }
-    else if (player != null && distToPlayer <= shootRange)
-    {
-        if (distToPlayer > stopChaseDistance)
+        if (agent != null)
         {
-            ChasePlayer(distToPlayer);
+            agent.speed = chaseSpeed;
+            agent.updateRotation = !faceTargetWhileMoving;
+        }
+    }
+
+    void Update()
+    {
+        if (currentState == State.Dead) return;
+
+        float distToPlayer = player != null ? Vector3.Distance(transform.position, player.position) : float.MaxValue;
+        float distToAirplane = airplaneTarget != null ? Vector3.Distance(transform.position, airplaneTarget.position) : float.MaxValue;
+
+        // 1. PRIORITAS UTAMA: Interaksi dengan Player
+        if (player != null && distToPlayer < retreatDistance)
+        {
+            Retreat();
+        }
+        else if (player != null && distToPlayer <= shootRange)
+        {
+            if (distToPlayer > stopChaseDistance)
+            {
+                ChasePlayer();
+            }
+            else
+            {
+                ShootPlayer();
+            }
+        }
+        // 2. PRIORITAS KEDUA: Menyerang Pesawat jika Player berada di luar jangkauan tembak
+        else if (airplaneTarget != null && distToAirplane <= shootRange)
+        {
+            AttackAirplane();
         }
         else
         {
-            // Sudah dalam jarak tembak & tidak terlalu dekat/jauh -> tembak player
-            ShootPlayer();
+            // Jika tidak ada target dalam jangkauan, beralih ke state Chase tapi berhenti bergerak
+            currentState = State.Chase;
+            if (agent != null) agent.isStopped = true;
         }
+
+        UpdateAnimator();
     }
-    // 3. PRIORITAS KEDUA: Menyerang Pesawat jika Player jauh
-    else if (airplaneTarget != null && Vector3.Distance(transform.position, airplaneTarget.position) <= shootRange)
-    {
-        AttackAirplane();
-    }
-    else
-    {
-        currentState = State.Chase;
-        agent.isStopped = true; 
-    }
-
-    UpdateAnimator();
-}
-
-void AttackAirplane()
-{
-    currentState = State.AttackAirplane;
-    agent.isStopped = true; 
-
-    FaceTarget(airplaneTarget.position);
-
-    // LOG UNTUK UTING: Cek apakah kode masuk ke fungsi serang pesawat
-    Debug.Log($"Mencoba Menyerang Pesawat. Cooldown Saat Ini: {fireCooldown}");
-
-    if (fireCooldown <= 0f)
-    {
-        Shoot();
-        fireCooldown = fireRate; // Reset cooldown (misal 1.5 detik)
-    }
-}
-
-void ShootPlayer()
-{
-    currentState = State.AttackPlayer;
-    agent.isStopped = true;
-
-    FaceTarget(player.position);
-
-    Debug.Log($"Mencoba Menyerang Player. Cooldown Saat Ini: {fireCooldown}");
-
-    if (fireCooldown <= 0f)
-    {
-        Shoot(player);
-        fireCooldown = fireRate;
-    }
-}
-
-void Shoot(Transform target = null)
-{
-    // LOG UNTUK UTING: Mengonfirmasi fungsi tembak C# berjalan
-    Debug.LogWarning("KODE C# FIRING: MEMICU ANIMATOR SHOOT SEKARANG!");
-
-    animator.SetTrigger("Shoot");
-
-    if (projectilePrefab != null && firePoint != null)
-    {
-        GameObject proj = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
-        ProjectilePlane p = proj.GetComponent<ProjectilePlane>();
-        // Kalau target eksplisit dikasih (misal player), pakai itu.
-        // Kalau tidak, default ke airplaneTarget (dipakai AttackAirplane).
-        if (p != null) p.SetTarget(target != null ? target : airplaneTarget);
-    }
-}
-
-// HAPUS dua fungsi ChasePlayer() yang lama, dan gunakan satu fungsi ini saja:
-void ChasePlayer(float dist)
-{
-    currentState = State.Chase;
-    agent.isStopped = false; // Membuka kunci NavMesh Agent agar bisa jalan lagi
-    agent.SetDestination(player.position);
-
-    if (faceTargetWhileMoving) FaceTarget(player.position);
-}
-
 
     void ChasePlayer()
     {
-        float dist = Vector3.Distance(transform.position, player.position);
-
-        if (dist < retreatDistance)
-        {
-            Retreat();
-            return;
-        }
-
         currentState = State.Chase;
-        agent.isStopped = false;
-        agent.SetDestination(player.position);
-        agent.isStopped = dist <= stopChaseDistance;
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.isStopped = false;
+            agent.SetDestination(player.position);
+        }
 
         if (faceTargetWhileMoving) FaceTarget(player.position);
     }
@@ -188,22 +142,173 @@ void ChasePlayer(float dist)
     {
         currentState = State.Retreat;
 
-        // Titik mundur: arah berlawanan dari player, dari posisi karakter sekarang
         Vector3 awayDir = (transform.position - player.position).normalized;
         Vector3 retreatPoint = transform.position + awayDir * retreatStepDistance;
 
-        // Cari titik valid terdekat di NavMesh supaya tidak keluar area
-        if (UnityEngine.AI.NavMesh.SamplePosition(retreatPoint, out var hit, retreatStepDistance, UnityEngine.AI.NavMesh.AllAreas))
+        // Menggunakan NavMesh.SamplePosition agar musuh tidak mundur menembus tembok/keluar map
+        if (NavMesh.SamplePosition(retreatPoint, out NavMeshHit hit, retreatStepDistance, NavMesh.AllAreas))
         {
-            agent.isStopped = false;
-            agent.SetDestination(hit.position);
+            if (agent != null && agent.isOnNavMesh)
+            {
+                agent.isStopped = false;
+                agent.SetDestination(hit.position);
+            }
         }
         else
         {
-            agent.isStopped = true;
+            if (agent != null) agent.isStopped = true;
         }
 
         if (faceTargetWhileMoving) FaceTarget(player.position);
+    }
+
+    void ShootPlayer()
+    {
+        currentState = State.AttackPlayer;
+        if (agent != null) agent.isStopped = true; // Berhenti jalan saat menembak
+
+        FaceTarget(player.position);
+
+        if (!isOnAttackCooldown)
+        {
+            ExecuteShoot(player);
+            StartCoroutine(AttackCooldownRoutine());
+        }
+    }
+
+    void AttackAirplane()
+    {
+        currentState = State.AttackAirplane;
+        if (agent != null) agent.isStopped = true;
+
+        FaceTarget(airplaneTarget.position);
+
+        if (!isOnAttackCooldown)
+        {
+            ExecuteShoot(airplaneTarget); // Peluru mengincar pesawat, tapi animasi visual tetap berjalan
+            StartCoroutine(AttackCooldownRoutine());
+        }
+    }
+
+    private void ExecuteShoot(Transform target)
+    {
+        // Memicu trigger animasi serangan visual ("Shoot")
+        if (animator != null) animator.SetTrigger("Shoot");
+
+        // Memutar suara tembakan
+        if (hostileAudioSource != null && rangedShootSound != null)
+            hostileAudioSource.PlayOneShot(rangedShootSound);
+
+        if (projectilePrefab == null || firePoint == null || target == null) return;
+
+        // Mengambil peluru dari pool (menggantikan Instantiate biasa)
+        GameObject bullet = GetProjectileFromPool();
+        bullet.transform.position = firePoint.position;
+        bullet.transform.rotation = Quaternion.identity;
+        bullet.SetActive(true);
+
+        // Mengirim data target ke script pergerakan peluru milikmu
+        ProjectilePlane pPlane = bullet.GetComponent<ProjectilePlane>();
+        if (pPlane != null) pPlane.SetTarget(target);
+
+        // Jika peluru menggunakan script bawaan prototype lama (Bullet / Projectile), sinkronkan statistiknya di sini
+        Bullet enemyBullet = bullet.GetComponent<Bullet>();
+        if (enemyBullet != null) enemyBullet.Setup(projectileSpeed, projectileDamage);
+
+        Rigidbody rb = bullet.GetComponent<Rigidbody>();
+        if (rb == null) return;
+
+        Vector3 targetPos = target.position + Vector3.up * 1f; // Menembak ke arah tengah tubuh target
+
+        // FITUR CANGGIH: Prediksi pergerakan target (Lead Prediction)
+        if (usePrediction)
+        {
+            float dist = Vector3.Distance(firePoint.position, targetPos);
+            float travelTime = dist / projectileSpeed;
+
+            Vector3 targetVel = Vector3.zero;
+            NavMeshAgent targetAgent = target.GetComponent<NavMeshAgent>();
+            Rigidbody targetRb = target.GetComponent<Rigidbody>();
+
+            if (targetAgent != null) targetVel = targetAgent.velocity;
+            else if (targetRb != null) targetVel = targetRb.linearVelocity;
+
+            targetPos += targetVel * travelTime;
+        }
+
+        // FITUR CANGGIH: Menghitung lengkungan kompensasi gravitasi peluru
+        Vector3 dir = (targetPos - firePoint.position).normalized;
+        float distance = Vector3.Distance(firePoint.position, targetPos);
+        float tEst = distance / projectileSpeed;
+        float gravOff = 0.5f * Mathf.Abs(Physics.gravity.y) * tEst * tEst;
+        if (distance > 0.001f)
+            dir = (dir + Vector3.up * (gravOff / distance)).normalized;
+
+        // FITUR CANGGIH: Efek Accuracy Error (Akurasi acak agar tembakan tidak melulu 100% lurus roboti)
+        if (accuracyError > 0f)
+        {
+            dir += new Vector3(
+                Random.Range(-accuracyError, accuracyError),
+                Random.Range(-accuracyError, accuracyError),
+                Random.Range(-accuracyError, accuracyError)) * 0.05f;
+            dir.Normalize();
+        }
+
+        // Jalankan peluru menggunakan Rigidbody Velocity
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        rb.linearVelocity = dir * projectileSpeed;
+        bullet.transform.forward = dir;
+
+        // Kembalikan peluru otomatis ke pool setelah lifetime habis
+        StartCoroutine(ReturnProjectileToPool(bullet, projectileLifetime));
+    }
+
+    private IEnumerator AttackCooldownRoutine()
+    {
+        isOnAttackCooldown = true;
+        yield return new WaitForSeconds(attackCooldown);
+        isOnAttackCooldown = false;
+    }
+
+    // ── Object Pooling System ──
+    private void InitializeProjectilePool()
+    {
+        if (projectilePrefab == null) return;
+        projectilePoolRoot = new GameObject("ProjectilePool - " + gameObject.name).transform;
+
+        for (int i = 0; i < projectilePoolSize; i++)
+        {
+            GameObject p = Instantiate(projectilePrefab, projectilePoolRoot);
+            p.SetActive(false);
+            projectilePool.Enqueue(p);
+        }
+    }
+
+    private GameObject GetProjectileFromPool()
+    {
+        if (projectilePool.Count == 0)
+        {
+            GameObject p = Instantiate(projectilePrefab, projectilePoolRoot);
+            p.SetActive(false);
+            projectilePool.Enqueue(p);
+        }
+        return projectilePool.Dequeue();
+    }
+
+    private IEnumerator ReturnProjectileToPool(GameObject projectile, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (projectile != null && projectilePoolRoot != null)
+        {
+            projectile.SetActive(false);
+            projectile.transform.SetParent(projectilePoolRoot);
+            projectilePool.Enqueue(projectile);
+        }
+        else if (projectile != null)
+        {
+            Destroy(projectile);
+        }
     }
 
     void FaceTarget(Vector3 targetPos)
@@ -215,41 +320,60 @@ void ChasePlayer(float dist)
         transform.rotation = Quaternion.Slerp(transform.rotation, look, Time.deltaTime * 5f);
     }
 
-    
     void UpdateAnimator()
-{
-    if (currentState == State.Retreat)
     {
-        // Jika sedang mundur, kirim nilai negatif ke parameter Speed
-        animator.SetFloat("Speed", -agent.velocity.magnitude);
+        if (animator == null || agent == null) return;
+
+        if (currentState == State.Retreat)
+        {
+            animator.SetFloat("Speed", -agent.velocity.magnitude);
+        }
+        else
+        {
+            animator.SetFloat("Speed", agent.velocity.magnitude);
+        }
     }
-    else
-    {
-        // Jika maju atau idle, kirim nilai positif seperti biasa
-        animator.SetFloat("Speed", agent.velocity.magnitude);
-    }
-}
 
     public void TakeDamage(int amount)
     {
         if (currentState == State.Dead) return;
 
         currentHealth -= amount;
+
+        // Memutar efek suara sakit acak dari array
+        if (hostileAudioSource != null && currentHealth > 0 && enemyHurtSounds != null && enemyHurtSounds.Length > 0)
+        {
+            AudioClip clip = enemyHurtSounds[Random.Range(0, enemyHurtSounds.Length)];
+            if (clip != null) hostileAudioSource.PlayOneShot(clip);
+        }
+
         if (currentHealth <= 0) Die();
     }
 
     void Die()
     {
         currentState = State.Dead;
-        agent.isStopped = true;
-        agent.enabled = false;
+        if (agent != null)
+        {
+            agent.isStopped = true;
+            agent.enabled = false;
+        }
 
-        var col = GetComponent<Collider>();
+        if (projectilePoolRoot != null) Destroy(projectilePoolRoot.gameObject);
+
+        Collider col = GetComponent<Collider>();
         if (col != null) col.enabled = false;
 
-        animator.SetTrigger("Die");
+        float destroyDelay = 5f;
 
-        // Hapus objek setelah animasi mati selesai (sesuaikan durasinya)
-        Destroy(gameObject, 5f);
+        // Memutar suara kematian
+        if (hostileAudioSource != null && enemyDeathSound != null)
+        {
+            hostileAudioSource.PlayOneShot(enemyDeathSound);
+            destroyDelay = Mathf.Max(destroyDelay, enemyDeathSound.length);
+        }
+
+        if (animator != null) animator.SetTrigger("Die");
+        Destroy(gameObject, destroyDelay);
     }
 }
