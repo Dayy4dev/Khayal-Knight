@@ -84,9 +84,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38b671a2c5f42934cb2c496b18fffaaa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CombatRoom
-  enemies:
-  - {fileID: 7734134644095645850, guid: 62083466e61628a4982e852d4ca0b48c, type: 3}
-  - {fileID: 0}
+  enemies: []
   doorBlocker: {fileID: 7294090365895232855}
 --- !u!114 &8174188124579540872
 MonoBehaviour:
