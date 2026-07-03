@@ -4388,26 +4388,102 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1662020988581974284, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
+      propertyPath: handCannonData
+      value: 
+      objectReference: {fileID: 11400000, guid: d3f9bd74f899d344c8abc4ef5d1c3911, type: 2}
     - target: {fileID: 2364290998775658487, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
       propertyPath: attackAudioSource
       value: 
       objectReference: {fileID: 1221553389}
     - target: {fileID: 2364290998775658487, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
+      propertyPath: 'swordSounds.Array.data[0]'
+      value: 
+      objectReference: {fileID: 8300000, guid: ba63b207b74ea02479b83e76b04e5e9d, type: 3}
+    - target: {fileID: 2364290998775658487, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
+      propertyPath: 'swordSounds.Array.data[1]'
+      value: 
+      objectReference: {fileID: 8300000, guid: 064bd8e22f6c2c7409d212fd579293aa, type: 3}
+    - target: {fileID: 2364290998775658487, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
+      propertyPath: 'swordSounds.Array.data[2]'
+      value: 
+      objectReference: {fileID: 8300000, guid: 282456ccd00c4d345acff99069cbb1ed, type: 3}
+    - target: {fileID: 2364290998775658487, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
+      propertyPath: 'hammerSounds.Array.data[0]'
+      value: 
+      objectReference: {fileID: 8300000, guid: 5e0e629789cafc74fb7fc83f273da574, type: 3}
+    - target: {fileID: 2364290998775658487, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
+      propertyPath: 'hammerSounds.Array.data[1]'
+      value: 
+      objectReference: {fileID: 8300000, guid: 15d9b8064e11f764c8abe6dad788e484, type: 3}
+    - target: {fileID: 2364290998775658487, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
+      propertyPath: 'hammerSounds.Array.data[2]'
+      value: 
+      objectReference: {fileID: 8300000, guid: 99062e8b86b63cd438f556297c62d4ee, type: 3}
+    - target: {fileID: 2364290998775658487, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
       propertyPath: handCannonSound.Array.size
       value: 4
       objectReference: {fileID: 0}
+    - target: {fileID: 2364290998775658487, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
+      propertyPath: 'handCannonSound.Array.data[0]'
+      value: 
+      objectReference: {fileID: 8300000, guid: f034dbcd81276bd438ce5283b991e95e, type: 3}
+    - target: {fileID: 2364290998775658487, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
+      propertyPath: 'handCannonSound.Array.data[1]'
+      value: 
+      objectReference: {fileID: 8300000, guid: 9bbce0302058d8b4abc163656db5faf5, type: 3}
+    - target: {fileID: 2364290998775658487, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
+      propertyPath: 'handCannonSound.Array.data[2]'
+      value: 
+      objectReference: {fileID: 8300000, guid: 79ba2d3fd0d858c4a8b7fc1a88b51c22, type: 3}
+    - target: {fileID: 2364290998775658487, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
+      propertyPath: 'handCannonSound.Array.data[3]'
+      value: 
+      objectReference: {fileID: 8300000, guid: fffd5e2ac3632954d9cf9b27001a79e9, type: 3}
     - target: {fileID: 3803412608342632589, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
       propertyPath: aimIndicator
       value: 
       objectReference: {fileID: 373971690}
+    - target: {fileID: 3803412608342632589, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
+      propertyPath: runFootstepSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 0394481c20cb56c46a1ed03c5e4a002b, type: 3}
+    - target: {fileID: 3803412608342632589, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
+      propertyPath: walkFootstepSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 2acd297ef919b1644b9d6cc5f8a5000a, type: 3}
+    - target: {fileID: 3803412608342632589, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
+      propertyPath: movementAudioSource
+      value: 
+      objectReference: {fileID: 771493386}
+    - target: {fileID: 3803412608342632589, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
+      propertyPath: runFootstepInterval
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 4004533348303330872, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
       propertyPath: maxHealth
-      value: 250
+      value: 514
       objectReference: {fileID: 0}
     - target: {fileID: 4004533348303330872, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
       propertyPath: playerAudioSource
       value: 
       objectReference: {fileID: 1221553389}
+    - target: {fileID: 4004533348303330872, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
+      propertyPath: hurtSounds.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4004533348303330872, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
+      propertyPath: 'hurtSounds.Array.data[0]'
+      value: 
+      objectReference: {fileID: 8300000, guid: c8c31b8d9bc0dc342b0d41a0f194f663, type: 3}
+    - target: {fileID: 4004533348303330872, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
+      propertyPath: 'hurtSounds.Array.data[1]'
+      value: 
+      objectReference: {fileID: 8300000, guid: dab7edfe21dd8054cba9c1bf154eaf2c, type: 3}
+    - target: {fileID: 4004533348303330872, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
+      propertyPath: 'hurtSounds.Array.data[2]'
+      value: 
+      objectReference: {fileID: 8300000, guid: dc56b16cb71b8b34da8c0d39a495c9b5, type: 3}
     - target: {fileID: 4845947942801928545, guid: 3c6cebcfba88ecf49a52871d9619d3b6, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -7150,7 +7226,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d83d49772977b345968aa199b588195, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LimitCamera
-  player: {fileID: 1929026393}
+  player: {fileID: 771493376}
 --- !u!114 &795282906
 MonoBehaviour:
   m_ObjectHideFlags: 0
