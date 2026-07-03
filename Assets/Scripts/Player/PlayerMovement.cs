@@ -17,6 +17,7 @@ public class PlayerMovement : MonoBehaviour
     private CharacterController controller;
     private Animator animator;
 
+    // Perubahan logika gabungan gerakan
     private Vector3 moveDirection = Vector3.zero;
     private Vector3 verticalVelocity = Vector3.zero;
     private bool isGrounded;
@@ -120,6 +121,10 @@ public class PlayerMovement : MonoBehaviour
             return; 
         }
 
+        if (aimIndicator != null && !aimIndicator.gameObject.activeSelf)
+        {
+            aimIndicator.gameObject.SetActive(true);
+        }
         if (aimIndicator != null && !aimIndicator.gameObject.activeSelf)
         {
             aimIndicator.gameObject.SetActive(true);

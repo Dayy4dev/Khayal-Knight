@@ -241,6 +241,7 @@ GameObject:
   - component: {fileID: 8247803356734006736}
   - component: {fileID: 2476869989935087230}
   - component: {fileID: 4825772630651691529}
+  - component: {fileID: 5445751405814295026}
   m_Layer: 6
   m_Name: ToyHammer
   m_TagString: Untagged
@@ -357,11 +358,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4372b96f71d3a94458c5609380e774d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponHitbox
-  weaponRig: {fileID: 0}
-  hitCollider: {fileID: 7877004602399758786}
-  targetLayers:
-    serializedVersion: 2
-    m_Bits: 128
 --- !u!114 &4825772630651691529
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -374,5 +370,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e9cba6ddebad4d47b0218f571539083, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAttack
-  weaponHitbox: {fileID: 2476869989935087230}
-  weaponData: {fileID: 11400000, guid: 3d94d0f8252b44747b7432e4970a5222, type: 2}
+  comboResetDuration: 1
+  playerHealth: {fileID: 0}
+--- !u!114 &5445751405814295026
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8482846541267236793}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e380efdc1bee10e459543fb995aa0e65, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HeavyImpact
+  damageRadius: 3
+  impactRadius: 3
+  impactLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  horizontalForce: 12
+  verticalForce: 8
+  forceFalloff: 1
+  stunDuration: 0.8
+  enableCameraShake: 1
+  enableKnockback: 1
+  enableEnemyLaunch: 1
+  enableImpactVFX: 1
+  cameraShakeDuration: 0.35
+  cameraShakeAmplitude: 0.25
+  cameraShakeFrequency: 30
+  impactVFXPrefab: {fileID: 1611651468995858867, guid: 43b7bed7fde6d8140bfaf93d63e58e21, type: 3}
+  impactVFXOffset: {x: 0, y: 0.1, z: 1}
+  impactVFXScale: {x: 2, y: 2, z: 2}
+  vfxLifetime: 0.7

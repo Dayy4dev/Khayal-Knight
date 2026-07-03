@@ -89,6 +89,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: b1ab9571012a4c7458499064afe45299, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7277461087263573202}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: b1ab9571012a4c7458499064afe45299, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -1126708778612215379}
   m_SourcePrefab: {fileID: 100100000, guid: b1ab9571012a4c7458499064afe45299, type: 3}
 --- !u!1 &7191896599336899810 stripped
 GameObject:
@@ -150,3 +153,18 @@ MonoBehaviour:
   weaponRig: {fileID: 0}
   damage: 0
   weaponData: {fileID: 11400000, guid: 8d8f63b3c40d28b4d85c65325692518d, type: 2}
+--- !u!114 &-1126708778612215379
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7191896599336899810}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42dbab54292c8434cbe455186bd95183, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ToyHammerVFX
+  boomVfxPrefab: {fileID: 6207240976866235721, guid: 1333a29cfcb86934d8335dc466c52d00, type: 3}
+  offset: {x: 0, y: 0.5, z: 0.8}
+  localScale: {x: 2, y: 2, z: 2}

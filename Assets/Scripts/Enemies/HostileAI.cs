@@ -45,6 +45,10 @@ public class HostileAI : MonoBehaviour, IDamageable
     [Header("Audio")]
     [SerializeField] private AudioSource hostileAudioSource;
     [SerializeField] private AudioClip rangedShootSound;
+
+    [Header("Visual Feedback")]
+    [SerializeField] private float hitFlashDuration = 0.1f;
+    [SerializeField] private Color hitFlashColor = Color.red;
     [SerializeField] private AudioClip[] enemyHurtSounds;
 [SerializeField] private AudioClip enemyDeathSound;
 
@@ -55,6 +59,13 @@ public class HostileAI : MonoBehaviour, IDamageable
     private EnemySpawner spawner;
     private bool isDead = false;
     private EnemyStunHandler stunHandler;
+
+    // Hit flash
+    private SkinnedMeshRenderer[] skinnedMeshRenderers;
+    private Color[][] originalColors;
+    private Coroutine hitFlashCoroutine;
+    private bool renderersCached = false;
+    private readonly string colorPropertyName = "_BaseColor";
 
     // ── Scaling API ───────────────────────────────────────────────────────────
 
@@ -248,8 +259,6 @@ public class HostileAI : MonoBehaviour, IDamageable
         }
     }
 
-    // ── Behaviour State Machine ───────────────────────────────────────────────
-
     private void UpdateBehaviourState()
     {
         if (!isPlayerVisible && !isPlayerInRange) PerformPatrol();
@@ -323,34 +332,22 @@ public class HostileAI : MonoBehaviour, IDamageable
         animator.SetFloat("Vertical", localVelocity.z);
     }
 
-    // ── IDamageable ───────────────────────────────────────────────────────────
-
     public void TakeDamage(int amount)
-{
-    if (isDead) return; // Jaga agar tidak memproses damage jika sudah mati
+    {
+        if (isDead) return; // Jaga agar tidak memproses damage jika sudah mati
 
     currentHealth = Mathf.Clamp(currentHealth - amount, 0, maxHealth);
 
-    if (healthBar != null) healthBar.SetHealth(currentHealth);
+        if (healthBar != null) healthBar.SetHealth(currentHealth);
 
     Debug.Log($"[HostileAI] {gameObject.name} kena {amount} damage — HP: {currentHealth}/{maxHealth}");
 
-    // --- TAMBAHAN: Memutar suara kesakitan acak ---
-    if (hostileAudioSource != null && currentHealth > 0 && enemyHurtSounds != null && enemyHurtSounds.Length > 0)
-    {
-        AudioClip randomHurtSound = enemyHurtSounds[Random.Range(0, enemyHurtSounds.Length)];
-        if (randomHurtSound != null)
+        if (currentHealth <= 0)
         {
-            hostileAudioSource.PlayOneShot(randomHurtSound);
+            isDead = true; // Tandai sudah mati
+            Die();
         }
     }
-
-    if (currentHealth <= 0)
-    {
-        isDead = true; // Tandai sudah mati
-        Die();
-    }
-}
 
     private void Die()
 {

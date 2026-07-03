@@ -52,7 +52,49 @@ MonoBehaviour:
   weaponRig: {fileID: 0}
   bulletPrefab: {fileID: 1341279259286703560, guid: 3b1ffcdb23098ee48a2062b0b11a6352, type: 3}
   firePoint: {fileID: 4947985785571846524}
+  shootVFXPrefab: {fileID: 0, guid: 2de24678f5206ca49a458dbc03f34c6f, type: 3}
+  shootVFXSpawnPoint: {fileID: 4119161896804020951}
+  shootVFXLocalPosition: {x: 0, y: 0, z: 0}
+  shootVFXLocalRotation: {x: 0, y: 0, z: 0}
+  shootVFXLocalScale: {x: 1, y: 1, z: 1}
+  shootVFXFollowWeapon: 1
+  shootVFXFlipWithParent: 1
+  shootVFXSortingLayer: Default
+  shootVFXSortingOrder: 0
+  shootVFXAutoDestroyTime: 0.5
   weaponData: {fileID: 11400000, guid: 1c2e5f0c8eaf6f04a8174c3233d67d43, type: 2}
+  playerMovement: {fileID: 0}
+--- !u!1 &1798550869070421218
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4119161896804020951}
+  m_Layer: 0
+  m_Name: ShootVFXSpawnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4119161896804020951
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1798550869070421218}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4947985785571846524}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2422231415622077625
 GameObject:
   m_ObjectHideFlags: 0
@@ -1897,6 +1939,7 @@ Transform:
   m_LocalPosition: {x: 0.212, y: 0.154, z: 0.425}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 4119161896804020951}
   m_Father: {fileID: 8610606156940947158}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

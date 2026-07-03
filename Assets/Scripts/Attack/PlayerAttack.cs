@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 
 [AddComponentMenu("Player/Player Attack")]
 public class PlayerAttack : MonoBehaviour
@@ -6,6 +7,12 @@ public class PlayerAttack : MonoBehaviour
     [Header("Combo Settings")]
     [Tooltip("Jeda waktu maksimal (detik) antar hit agar combo tidak ter-reset")]
     [SerializeField] private float comboResetDuration = 1.0f;
+
+    [Header("Knockback Settings")]
+    [SerializeField] private bool enableUnarmedKnockback = true;
+    [SerializeField] private bool applyVerticalForceToUnarmed = false;
+    [SerializeField] private bool enableSwordKnockback = false;
+    [SerializeField] private bool enableHammerKnockback = true;
 
     [Header("References")]
     [SerializeField] private PlayerHealth playerHealth;
@@ -27,6 +34,12 @@ public class PlayerAttack : MonoBehaviour
     private WeaponHitbox weaponHitbox;
     private int permanentDamageBuff = 0;
 
+    public event Action<string> OnWeaponEquipped;
+
+    public event Action<int> OnAttackExecuted;
+
+    public event Action OnHeavyImpactExecuted;
+
     void Awake()
     {
         if (playerHealth == null)
@@ -42,6 +55,9 @@ public class PlayerAttack : MonoBehaviour
         currentWeaponData = data;
         activeWeaponComponent = weaponComponent;
         ResetCombo();
+
+        string category = GetWeaponCategory(data);
+        OnWeaponEquipped?.Invoke(category);
     }
 
     public void SetWeaponHitbox(WeaponHitbox hitbox)
@@ -62,6 +78,11 @@ public class PlayerAttack : MonoBehaviour
     public void ResetCombo()
     {
         currentComboHit = 0;
+    }
+
+    public int GetCurrentComboHit()
+    {
+        return currentComboHit;
     }
 
    void Update()
@@ -105,6 +126,12 @@ public class PlayerAttack : MonoBehaviour
 
         if (activeWeaponComponent != null && !activeWeaponComponent.CanAttack()) return;
 
+        // 2. CEK COMBO COOLDOWN — jangan advance combo jika animasi sebelumnya
+        //    masih dalam cooldown (mencegah combo skip)
+        MCAnimationController animCtrl = FindFirstObjectByType<MCAnimationController>();
+        if (animCtrl != null && animCtrl.IsInComboCooldown) return;
+
+        // 3. ATUR COMBO TERLEBIH DAHULU SEBELUM HITBOX SENJATA AKTIF
         float timeSinceLastAttack = Time.time - lastAttackTime;
         if (timeSinceLastAttack > comboResetDuration)
         {
@@ -121,14 +148,16 @@ public class PlayerAttack : MonoBehaviour
         string weaponName = (currentWeaponData != null) ? currentWeaponData.weaponName : "Tangan Kosong";
         Debug.Log($"[Attack Melee] Mengayunkan {weaponName} | Combo Hit: {currentComboHit}");
 
-        // === LOGIKA BARU: MEMUTAR SUARA SENJATA BERDASARKAN COMBO ===
-        PlayAttackSound();
+        // Notify animation system — fires for EVERY click, even when combo value wraps
+        OnAttackExecuted?.Invoke(currentComboHit);
 
+        // 4. JALANKAN LOGIKA SERANGAN SENJATA
         if (activeWeaponComponent != null)
         {
             activeWeaponComponent.Attack(); 
         }
 
+        // 5. AKTIFKAN HITBOX SENJATA PALING TERAKHIR AGAR MEMBACA COMBO YANG SUDAH UP-TO-DATE
         if (weaponHitbox != null)
         {
             weaponHitbox.ActivateHitbox();
@@ -201,6 +230,11 @@ public class PlayerAttack : MonoBehaviour
             finalDamage = Mathf.RoundToInt(baseTotal * 1.25f);
             stunDuration = 0.8f;
         }
+        else if (category == "Hammer" && currentComboHit == 3)
+        {
+            finalDamage = Mathf.RoundToInt(baseTotal * 1.50f);
+            stunDuration = 1.0f;
+        }
     }
     
     public int GetPermanentDamageBuff()
@@ -210,7 +244,7 @@ public class PlayerAttack : MonoBehaviour
 
     private string GetWeaponCategory(WeaponData data)
     {
-        if (data == null || string.IsNullOrEmpty(data.weaponName)) return "Unknown";
+        if (data == null || string.IsNullOrEmpty(data.weaponName)) return "Unarmed";
         string nameLower = data.weaponName.ToLower();
 
         if (nameLower.Contains("sword") || nameLower.Contains("blade") || nameLower.Contains("calibur"))
@@ -219,8 +253,10 @@ public class PlayerAttack : MonoBehaviour
             return "Hammer";
         if (nameLower.Contains("cannon") || nameLower.Contains("blaster"))
             return "Cannon";
+        if (nameLower.Contains("unarmed") || nameLower.Contains("punch") || nameLower.Contains("fist"))
+            return "Unarmed";
 
-        return "Unknown";
+        return "Unarmed";
     }
 
     public WeaponData GetCurrentWeaponData()
@@ -228,22 +264,54 @@ public class PlayerAttack : MonoBehaviour
         return currentWeaponData; 
     }
 
-    public void ApplyKnockback(GameObject target)
+    public void ApplyKnockback(GameObject target, float verticalForce = 0f)
     {
-        if (target == null || currentWeaponData == null) return;
+        if (target == null) return;
 
+        string category = GetWeaponCategory(currentWeaponData);
+        
+        if (category == "Sword" && !enableSwordKnockback) return;
+        if (category == "Hammer" && !enableHammerKnockback) return;
+        if (category == "Unarmed" && !enableUnarmedKnockback) return;
+
+        if (category == "Unarmed" && !applyVerticalForceToUnarmed)
+        {
+            verticalForce = 0f;
+        }
+
+        float force = 5f;
+        if (category == "Hammer") force = 8f; 
+
+        // Try NavMesh-aware knockback first
+        if (target.TryGetComponent<EnemyKnockback>(out var enemyKb))
+        {
+            if (verticalForce > 0f)
+                enemyKb.ApplyHeavyKnockback(transform.position, force, verticalForce);
+            else
+                enemyKb.ApplyKnockback(transform.position, force);
+            return;
+        }
+
+        // Fallback for non-enemies (e.g. breakable props with Rigidbody)
         Rigidbody targetRb = target.GetComponent<Rigidbody>();
         if (targetRb != null)
         {
-            Vector3 knockbackDirection = (target.transform.position - transform.position).normalized;
+            Vector3 knockbackDirection = (target.transform.position - transform.position);
             knockbackDirection.y = 0; 
-
-            float force = 5f;
-
-            string category = GetWeaponCategory(currentWeaponData);
-            if (category == "Hammer") force = 8f; 
+            if (knockbackDirection.sqrMagnitude < 0.001f) knockbackDirection = transform.forward;
+            knockbackDirection.Normalize();
 
             targetRb.AddForce(knockbackDirection * force, ForceMode.VelocityChange);
+
+            if (verticalForce > 0f)
+            {
+                targetRb.AddForce(Vector3.up * verticalForce, ForceMode.VelocityChange);
+            }
         }
+    }
+
+    public void FireHeavyImpactEvent()
+    {
+        OnHeavyImpactExecuted?.Invoke();
     }
 }

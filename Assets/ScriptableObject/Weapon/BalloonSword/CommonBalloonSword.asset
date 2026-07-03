@@ -16,11 +16,11 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: 7f613faf5cf863e4b9d4dfa997a4ca38, type: 3}
   overrideRarity: 
   pickupPrefab: {fileID: 9004413375024476235, guid: 7dc22a81197cb064bbe8110e893cac9d, type: 3}
-  damage: 50
-  attackDuration: 0.5
-  attackCooldown: 0.5
-  knockbackForce: 10
-  knockbackDuration: 0.2
+  damage: 30
+  attackDuration: 0.55
+  attackCooldown: 2
+  knockbackForce: 0
+  knockbackDuration: 0
   maxComboCount: 3
   meleeReloadTime: 1
   defaultCapacity: 0

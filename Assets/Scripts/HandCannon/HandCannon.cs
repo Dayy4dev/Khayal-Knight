@@ -46,6 +46,12 @@ public class HandCannon : Weapon
             fireRate = weaponData.fireRate;
         }
 
+        if (playerMovement == null)
+            playerMovement = GetComponentInParent<PlayerMovement>();
+
+        if (shootVFXSpawnPoint == null)
+            shootVFXSpawnPoint = firePoint;
+
         currentBullet = magazineSize;
     }
 
@@ -125,6 +131,8 @@ public override void Attack()
     Vector3 shootDirection = (targetPos - firePoint.position).normalized;
     bullet.transform.rotation = Quaternion.LookRotation(shootDirection);
 
+    base.SpawnShootVFX();
+
     // --- LOGIKA KALKULASI BUFF DAMAGE RANGE SESUAI MATRIKS STAT ---
     int baseWeaponDamage = (weaponData != null) ? weaponData.damage : 10;
     int finalPeluruDamage = baseWeaponDamage;
@@ -149,6 +157,7 @@ public override void Attack()
 
     ConsumeBullet();
 }
+
     private void OnDisable()
     {
         // Jika senjata dihancurkan/dibuang saat reload, amankan statenya

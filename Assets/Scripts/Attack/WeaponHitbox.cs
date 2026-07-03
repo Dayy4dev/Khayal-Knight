@@ -1,19 +1,27 @@
 using UnityEngine;
+using System;
 using System.Collections;
 
 public class WeaponHitbox : MonoBehaviour
 {
+    public event Action<GameObject> OnEnemyHit;
+
     private Collider hitboxCollider;
 
     void Awake()
     {
         hitboxCollider = GetComponent<Collider>();
+
         if (hitboxCollider != null)
         {
             hitboxCollider.isTrigger = true;
-            hitboxCollider.enabled = false; 
+            hitboxCollider.enabled = false;
         }
-        // HAPUS pencarian playerAttack di sini agar tidak error Null lagi!
+        else
+        {
+            Debug.LogError($"[WeaponHitbox] No Collider found on '{gameObject.name}'. " +
+                "OnTriggerEnter requires the collider to be on the same GameObject.");
+        }
     }
 
     public void ActivateHitbox()
@@ -32,9 +40,9 @@ public class WeaponHitbox : MonoBehaviour
 
     private IEnumerator HitboxRoutine()
     {
-        if (hitboxCollider != null) hitboxCollider.enabled = true; 
+        if (hitboxCollider != null) hitboxCollider.enabled = true;
         yield return new WaitForSeconds(0.2f);
-        if (hitboxCollider != null) hitboxCollider.enabled = false; 
+        if (hitboxCollider != null) hitboxCollider.enabled = false;
     }
 
 private void OnTriggerEnter(Collider other)
@@ -81,6 +89,9 @@ private void OnTriggerEnter(Collider other)
             // 1. Berikan damage hasil kalkulasi buff ke musuh!
             enemyHealth.TakeDamage(damageYangDiberikan);
             Debug.Log($"[Hitbox Melee] Berhasil memukul {other.name} | Total Damage + Buff: {damageYangDiberikan}");
+
+            // Notify listeners (e.g. ToyHammer for HeavyImpact dedup)
+            OnEnemyHit?.Invoke(other.gameObject);
 
             // 2. Berikan efek dorongan (Knockback)
             if (playerAttack != null)

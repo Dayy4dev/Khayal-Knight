@@ -622,6 +622,7 @@ GameObject:
   - component: {fileID: 503557058892814127}
   - component: {fileID: 4666201444385552240}
   - component: {fileID: -5479661546747017530}
+  - component: {fileID: 6564978487027779014}
   m_Layer: 7
   m_Name: EnemyMeleeJumbo
   m_TagString: Enemy
@@ -742,6 +743,8 @@ MonoBehaviour:
   engagementRange: 2.43
   enemyAudioSource: {fileID: 0}
   meleeAttackSound: {fileID: 0}
+  hitFlashDuration: 0.1
+  hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!136 &503557058892814127
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -795,6 +798,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b6f4740de998f745b9a9761acd6eed0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyStunHandler
+--- !u!54 &6564978487027779014
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2969935072401831654}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 1
+  m_Constraints: 80
+  m_CollisionDetection: 1
 --- !u!1 &3156698293219667692
 GameObject:
   m_ObjectHideFlags: 0

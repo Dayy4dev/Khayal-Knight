@@ -1,10 +1,17 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class ToyHammer : Weapon
 {
     private WeaponHitbox hitbox;
     [SerializeField] private WeaponData weaponData;
+
+    [Header("Heavy Impact")]
+    [SerializeField] private HeavyImpact heavyImpact;
+    [Tooltip("Delay (seconds) before Heavy Impact fires after Attack3 starts. " +
+             "Tune this to match the animation's impact frame.")]
+    [SerializeField] private float heavyImpactDelay = 2.4f;
 
     // State Melee Reload/Rehat
     private int maxComboCount;
@@ -16,6 +23,9 @@ public class ToyHammer : Weapon
     private int damage;
 
 
+    private Coroutine heavyImpactCoroutine;
+    private HashSet<int> hitboxDamagedEnemies = new HashSet<int>();
+
     private void Awake()
     {
         hitbox = GetComponent<WeaponHitbox>();
@@ -23,6 +33,24 @@ public class ToyHammer : Weapon
         {
             Debug.LogWarning("[ToyHammer] No WeaponHitbox component found!");
         }
+
+        if (heavyImpact == null)
+            heavyImpact = GetComponent<HeavyImpact>();
+
+        // Track enemies damaged by the hitbox so HeavyImpact can skip them
+        if (hitbox != null)
+            hitbox.OnEnemyHit += TrackHitboxHit;
+    }
+
+    private void OnDestroy()
+    {
+        if (hitbox != null)
+            hitbox.OnEnemyHit -= TrackHitboxHit;
+    }
+
+    private void TrackHitboxHit(GameObject enemy)
+    {
+        hitboxDamagedEnemies.Add(enemy.GetInstanceID());
     }
 
     private void Start()
@@ -43,6 +71,7 @@ public class ToyHammer : Weapon
             StopCoroutine(reheatCoroutine);
             reheatCoroutine = null;
         }
+        StopHeavyImpactCoroutine();
         isReheating = false;
         remainingReheatTime = 0f;
     }
@@ -56,15 +85,50 @@ public class ToyHammer : Weapon
     {
         if (!CanAttack() || hitbox == null) return;
 
+        // Determine which combo hit this is
+        PlayerAttack playerAttack = GetComponentInParent<PlayerAttack>();
+        int comboHit = (playerAttack != null) ? playerAttack.GetCurrentComboHit() : 1;
+
+        // All attacks: activate hitbox immediately for damage/knockback
         hitbox.ActivateHitbox();
         Invoke(nameof(DeactivateHitbox), 0.3f);
 
-        // Kurangi jatah ayunan
+        // Attack3 (Heavy Finisher): also schedule Heavy Impact for area effects
+        // (camera shake, VFX, area knockback/launch) after a delay
+        if (comboHit == 3 && heavyImpact != null)
+        {
+            StopHeavyImpactCoroutine();
+            heavyImpactCoroutine = StartCoroutine(HeavyImpactDelayed());
+            Debug.Log("[ToyHammer] Attack3 — Heavy Impact scheduled via coroutine.");
+        }
+
+        // Deduct combo charge
         currentComboLeft--;
 
         if (currentComboLeft <= 0)
         {
             reheatCoroutine = StartCoroutine(ReheatCoroutine());
+        }
+    }
+
+    private IEnumerator HeavyImpactDelayed()
+    {
+        yield return new WaitForSeconds(heavyImpactDelay);
+        if (heavyImpact != null)
+        {
+            // Pass enemies already damaged by the hitbox to prevent double-damage
+            heavyImpact.ExecuteImpact(hitboxDamagedEnemies);
+        }
+        hitboxDamagedEnemies.Clear();
+        heavyImpactCoroutine = null;
+    }
+
+    private void StopHeavyImpactCoroutine()
+    {
+        if (heavyImpactCoroutine != null)
+        {
+            StopCoroutine(heavyImpactCoroutine);
+            heavyImpactCoroutine = null;
         }
     }
 
@@ -76,6 +140,8 @@ public class ToyHammer : Weapon
 
     public override void OnWeaponDeactivate()
     {
+        StopHeavyImpactCoroutine();
+
         if (isReheating && reheatCoroutine != null)
         {
             StopCoroutine(reheatCoroutine);
@@ -145,4 +211,5 @@ public class ToyHammer : Weapon
         }
         return 0f;
     }
+
 }
