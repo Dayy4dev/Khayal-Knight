@@ -9,12 +9,25 @@ public class PartnerSystem : MonoBehaviour
     [Header("Child Box Components")]
     [SerializeField] private CandyBox[] candyBoxes;
 
+    [Header("Animation Settings")]
+    [SerializeField] private Animator guideAnimator; 
+
     private List<string> candyPool = new List<string> { "Heal", "MaxHP", "BuffDamage", "InstantDamage" };
     private List<string> selectedCandies = new List<string>();
 
     void Start()
     {
         SetupRandomCandies();
+
+        if (guideAnimator == null)
+        {
+            guideAnimator = GetComponentInChildren<Animator>();
+        }
+
+        // --- UBAH DI SINI ----------------------------------------------------
+        // Saat game mulai, Guide akan otomatis idle (karena Idle adalah Entry state).
+        // Kita tidak perlu mengatur bool apa-apa di sini.
+        // ---------------------------------------------------------------------
     }
 
     void SetupRandomCandies()
@@ -46,16 +59,13 @@ public class PartnerSystem : MonoBehaviour
         PlayerHealth healthComponent = player.GetComponent<PlayerHealth>();
         PlayerBuffManager buffManager = player.GetComponent<PlayerBuffManager>();
 
-        // --- LOGIKA EFEK PERMEN (SINKRON DENGAN PLAYERBUFFMANAGER) ---
         switch (chosenEffect)
         {
             case "Heal":
-                // Tetap Full Heal biasa (g usah diganti ke buff manager)
                 if (healthComponent != null) healthComponent.Heal(healthComponent.GetMaxHealth());
                 break;
 
             case "MaxHP":
-                // Permen MaxHP memanggil fungsi Max HP +100 & Heal 30% gabungan
                 if (buffManager != null)
                 {
                     buffManager.ApplyHpAndHealBuff();
@@ -63,7 +73,6 @@ public class PartnerSystem : MonoBehaviour
                 break;
 
             case "BuffDamage":
-                // Permen BuffDamage memanggil fungsi Damage +50
                 if (buffManager != null)
                 {
                     buffManager.ApplyDamageBuff();
@@ -91,6 +100,16 @@ public class PartnerSystem : MonoBehaviour
         {
             LootboxManager.Instance.SetCandyEffectStatus(chosenEffect);
         }
+
+        // --- UBAH DI SINI (LOGIKA TRIGGER) -----------------------------------
+        // Saat permen dipilih, kita tembak Trigger 'PlayInteract'.
+        // Guide akan pindah ke anim Interaction, putar sampai habis, lalu balik Idle.
+        if (guideAnimator != null)
+        {
+            guideAnimator.SetTrigger("PlayInteract");
+            Debug.Log("[PartnerSystem] Candy dipilih, memutar animasi Interaction sekali.");
+        }
+        // ---------------------------------------------------------------------
 
         foreach (CandyBox box in candyBoxes)
         {
