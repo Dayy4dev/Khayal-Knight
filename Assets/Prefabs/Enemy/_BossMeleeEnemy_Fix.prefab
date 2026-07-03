@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &162902846939985524
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7804601222800798473}
+  m_Layer: 7
+  m_Name: EnemySpawn (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7804601222800798473
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 162902846939985524}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 335412594813365135}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &396783407523448951
 GameObject:
   m_ObjectHideFlags: 0
@@ -400,6 +431,37 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!1 &8519347148611424753
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1522814392408585530}
+  m_Layer: 7
+  m_Name: EnemySpawn
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1522814392408585530
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8519347148611424753}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 335412594813365135}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8954165420383579042
 GameObject:
   m_ObjectHideFlags: 0
@@ -747,6 +809,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: e46aca74891409e43800f80516a41014, type: 3}
       insertIndex: 0
       addedObject: {fileID: 674492735921808433}
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: e46aca74891409e43800f80516a41014, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1522814392408585530}
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: e46aca74891409e43800f80516a41014, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7804601222800798473}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: e46aca74891409e43800f80516a41014, type: 3}
       insertIndex: -1
@@ -988,8 +1056,8 @@ MonoBehaviour:
   minionPrefabs:
   - {fileID: 7670636706137101513, guid: 1a51242261dce88499656523eb245c75, type: 3}
   minionSpawnPoints:
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 7804601222800798473}
+  - {fileID: 1522814392408585530}
   maxMinions: 4
   minionSpawnInterval: 8
   minionsPerWave: 2
