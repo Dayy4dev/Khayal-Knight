@@ -5741,7 +5741,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonManager
   dungeonGenerator: {fileID: 634518726}
   playerTransform: {fileID: 1929026399}
-  bossRoomPrefabs: []
+  bossRoomPrefabs:
+  - {fileID: 789193209607343952, guid: 31c0a312b4c22604788876fce3318a87, type: 3}
+  - {fileID: 4998477944928547305, guid: 21e35bb0cf30ae7498f42de9973043cc, type: 3}
+  - {fileID: 3042001795012262410, guid: 6bff1d4c09de98b44bce4d8a5cc761f7, type: 3}
+  - {fileID: 6410530479195758066, guid: 5f4fd8ccf738e074d83e5d88d68e9500, type: 3}
   finalBossRoomPrefab: {fileID: 0}
   toBeContinuedUI: {fileID: 1870715884}
   spawnPointName: SpawnPoint
@@ -14094,7 +14098,7 @@ Transform:
   m_GameObject: {fileID: 1774844244}
   serializedVersion: 2
   m_LocalRotation: {x: 0.32075116, y: 0.06193222, z: -0.02102315, w: 0.9449027}
-  m_LocalPosition: {x: 7.140929, y: 8.28129, z: -2.7562847}
+  m_LocalPosition: {x: 7.140478, y: 8.28129, z: -2.756225}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -17579,7 +17583,7 @@ Transform:
   m_GameObject: {fileID: 2099797335}
   serializedVersion: 2
   m_LocalRotation: {x: 0.32075116, y: 0.06193222, z: -0.02102315, w: 0.9449027}
-  m_LocalPosition: {x: 7.140929, y: 8.28129, z: -2.7562847}
+  m_LocalPosition: {x: 7.140478, y: 8.28129, z: -2.756225}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
