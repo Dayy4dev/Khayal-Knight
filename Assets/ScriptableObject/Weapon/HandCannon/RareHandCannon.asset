@@ -15,7 +15,7 @@ MonoBehaviour:
   weaponName: HandCannon
   icon: {fileID: 21300000, guid: 01cd077f718c76046931e0f57d11ba86, type: 3}
   overrideRarity: 
-  pickupPrefab: {fileID: 0}
+  pickupPrefab: {fileID: 5645088245580584797, guid: 1eb35c86ca8b0de48975396700abb2ca, type: 3}
   damage: 80
   attackDuration: 0
   attackCooldown: 0
