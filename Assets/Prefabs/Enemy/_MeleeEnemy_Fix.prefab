@@ -639,11 +639,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: e46aca74891409e43800f80516a41014, type: 3}
       propertyPath: m_Name
-      value: MeleeEnemy_Fix
+      value: _MeleeEnemy_Fix
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: e46aca74891409e43800f80516a41014, type: 3}
       propertyPath: m_Layer
       value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: e46aca74891409e43800f80516a41014, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
       objectReference: {fileID: 0}
     - target: {fileID: 1342948525764391870, guid: e46aca74891409e43800f80516a41014, type: 3}
       propertyPath: m_Layer
