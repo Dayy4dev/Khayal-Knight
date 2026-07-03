@@ -122,8 +122,9 @@ public class EnemyDummy : MonoBehaviour, IDamageable
             Die();
         }
     }
+    }
 
-    IEnumerator HitFlash()
+    private IEnumerator HitFlash()
     {
         ChangeMeshColor(hitFlashColor);
         yield return new WaitForSeconds(hitFlashDuration);
