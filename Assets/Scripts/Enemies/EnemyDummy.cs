@@ -13,11 +13,27 @@ public class EnemyDummy : MonoBehaviour, IDamageable
 
     private SkinnedMeshRenderer[] skinnedMeshRenderers;
     private Color[][] originalColors;
+    private Coroutine hitFlashCoroutine;
+    private bool renderersCached = false;
 
     private string colorPropertyName = "_BaseColor";
 
     [Header("UI")]
     public EnemyHealthBar healthBar;
+
+    private EnemySpawner spawner;
+
+    // -------------------------------------------------------------------------
+    // AUDIO SETUP
+    // -------------------------------------------------------------------------
+    [Header("Audio Setup")]
+    [SerializeField] private AudioSource audioSource;
+    
+    // Variasi suara hurt (prioritas array, fallback ke single clip)
+    [SerializeField] private AudioClip[] enemyHurtSounds = new AudioClip[3]; 
+    [SerializeField] private AudioClip enemyHurtSound; // Fallback single clip
+    
+    [SerializeField] private AudioClip enemyDeathSound; 
 
     void Start()
     {
@@ -26,50 +42,94 @@ public class EnemyDummy : MonoBehaviour, IDamageable
         if (healthBar != null)
             healthBar.SetMaxHealth(maxHealth);
 
-        skinnedMeshRenderers = GetComponentsInChildren<SkinnedMeshRenderer>();
-        originalColors = new Color[skinnedMeshRenderers.Length][];
+        spawner = GetComponentInParent<EnemySpawner>();
+        if (spawner == null)
+        {
+            // Kompatibel untuk Unity versi lama dan baru
+            #if UNITY_2023_1_OR_NEWER
+            spawner = FindFirstObjectByType<EnemySpawner>();
+            #else
+            spawner = FindObjectOfType<EnemySpawner>();
+            #endif
+        }
 
+        CacheRenderers();
+    }
+
+    private void CacheRenderers()
+    {
+        if (renderersCached) return;
+
+        skinnedMeshRenderers = GetComponentsInChildren<SkinnedMeshRenderer>();
+        if (skinnedMeshRenderers.Length == 0)
+        {
+            Debug.LogWarning($"[EnemyDummy] No SkinnedMeshRenderer found on '{gameObject.name}' or its children!");
+            return;
+        }
+
+        originalColors = new Color[skinnedMeshRenderers.Length][];
         for (int i = 0; i < skinnedMeshRenderers.Length; i++)
         {
             Material[] materials = skinnedMeshRenderers[i].materials;
             originalColors[i] = new Color[materials.Length];
-            
             for (int j = 0; j < materials.Length; j++)
             {
                 if (materials[j].HasProperty(colorPropertyName))
-                {
                     originalColors[i][j] = materials[j].GetColor(colorPropertyName);
-                }
             }
         }
+        renderersCached = true;
     }
 
     public void TakeDamage(int amount)
     {
+        if (currentHealth <= 0) return; // Sudah mati, abaikan
+
         currentHealth -= amount;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
 
         if (healthBar != null)
             healthBar.SetHealth(currentHealth);
 
+    if (audioSource != null && enemyHurtSounds != null)
+        audioSource.PlayOneShot(enemyHurtSounds[Random.Range(0, enemyHurtSounds.Length)]);
+
+    if (!renderersCached) CacheRenderers();
+
         if (skinnedMeshRenderers != null && skinnedMeshRenderers.Length > 0)
         {
-            StartCoroutine(HitFlash());
+            // Hentikan coroutine flash sebelumnya agar tidak overlap jika di-hit cepat
+            if (hitFlashCoroutine != null)
+                StopCoroutine(hitFlashCoroutine);
+                
+            hitFlashCoroutine = StartCoroutine(HitFlash());
         }
 
-        Debug.Log($"{gameObject.name} kena {amount} damage — HP: {currentHealth}/{maxHealth}");
+    // --- KNOCKBACK ---
+    // Cari objek player di dalam map
+    GameObject player = GameObject.FindGameObjectWithTag("Player");
+    if (player != null)
+    {
+
+        if (player.TryGetComponent<PlayerAttack>(out PlayerAttack pAttack))
+        {
+            audioSource.PlayOneShot(enemyHurtSounds[Random.Range(0, enemyHurtSounds.Length)]);
+        }
+        // ------------------------------------------
 
         if (currentHealth <= 0)
+        {
             Die();
+        }
+    }
     }
 
-    IEnumerator HitFlash()
+    private IEnumerator HitFlash()
     {
         ChangeMeshColor(hitFlashColor);
-        
         yield return new WaitForSeconds(hitFlashDuration);
-        
         ResetMeshColor();
+        hitFlashCoroutine = null;
     }
 
     private void ChangeMeshColor(Color color)
@@ -109,7 +169,25 @@ public class EnemyDummy : MonoBehaviour, IDamageable
     void Die()
     {
         Debug.Log($"{gameObject.name} mati!");
-        Destroy(gameObject, 0.1f);
+
+        if (spawner != null)
+            spawner.NotifyEnemyDestroyed(gameObject);
+
+        // Update counter tutorial jika ada
+        if (TutorialManager.Instance != null)
+        {
+            TutorialManager.Instance.enemiesDefeated++;
+        }
+
+        float destroyDelay = 0.1f;
+        if (audioSource != null && enemyDeathSound != null)
+        {
+            audioSource.PlayOneShot(enemyDeathSound);
+            // Kasih waktu suara mati untuk selesai dulu sebelum objek dihancurkan.
+            destroyDelay = Mathf.Max(destroyDelay, enemyDeathSound.length);
+        }
+
+        Destroy(gameObject, destroyDelay);
     }
 
     void OnCollisionEnter(Collision collision)

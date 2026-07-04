@@ -8,21 +8,19 @@ public class HandCannon : Weapon
     [SerializeField] private Bullet bulletPrefab;
     [SerializeField] private Transform firePoint;
 
-    [Header("Laser Indicator")]
-    [SerializeField] private LineRenderer laserLineRenderer;
-    [SerializeField] private float laserDistance = 30f;
-
     [Header("References")]
     [SerializeField] private WeaponData weaponData;
-    [SerializeField] private PlayerMovement playerMovement; // Tarik script PlayerMovement ke sini di Inspector
+    [SerializeField] private PlayerMovement playerMovement;
 
     // Internal state
     private int magazineSize;
     private float reloadTime;
+    private float fireRate;
     private int currentBullet;
     private bool isReloading;
     private Coroutine reloadCoroutine;
     private float remainingReloadTime;
+    private float fireRateTimer;
 
     private IObjectPool<Bullet> bulletPool;
 
@@ -45,68 +43,133 @@ public class HandCannon : Weapon
         {
             reloadTime = weaponData.reloadTime;
             magazineSize = weaponData.magazineSize;
+            fireRate = weaponData.fireRate;
         }
 
-        // Diisi setelah weaponData dibaca, biar nilainya bener
+        if (playerMovement == null)
+            playerMovement = GetComponentInParent<PlayerMovement>();
+
+        if (shootVFXSpawnPoint == null)
+            shootVFXSpawnPoint = firePoint;
+
         currentBullet = magazineSize;
-
-        // Pastikan laser mati di awal game jika tidak klik kanan
-        if (laserLineRenderer != null)
-        {
-            laserLineRenderer.enabled = false;
-        }
     }
 
     private void Update()
     {
-        if (laserLineRenderer == null || firePoint == null || playerMovement == null) return;
+        if (fireRateTimer > 0f)
+            fireRateTimer -= Time.deltaTime;
 
-        // CEK INPUT: 1 adalah index untuk Klik Kanan
-        if (Input.GetMouseButton(1))
+            if (Input.GetMouseButtonDown(0))
+    {
+        // Panggil fungsi pembatas kita
+        if (CanShoot())
         {
-            // Aktifkan LineRenderer jika sedang menahan klik kanan
-            if (!laserLineRenderer.enabled) laserLineRenderer.enabled = true;
-
-            // Pangkal laser tetap di moncong
-            laserLineRenderer.SetPosition(0, firePoint.position);
-
-            // Ambil target horizontal dari posisi mouse
-            Vector3 targetPos = playerMovement.GetMouseTargetPosition;
-
-            // Kunci tinggi Y agar sejajar dengan moncong senjata, biar gak menukik ke lantai
-            targetPos.y = firePoint.position.y;
-
-            // Paksa ujung laser menunjuk ke target tersebut!
-            laserLineRenderer.SetPosition(1, targetPos);
+            FireBullet(); // Ganti dengan fungsi asli menembak peluru kamu
         }
         else
         {
-            // Matikan LineRenderer jika klik kanan dilepas
-            if (laserLineRenderer.enabled) laserLineRenderer.enabled = false;
+            Debug.Log("[HandCannon] Gagal menembak! Kamu harus menahan KLIK KANAN.");
         }
     }
+    }
+    public bool CanShoot()
+{
+    // Input.GetMouseButton(1) artinya klik kanan SEDANG DITAHAN
+    bool isAiming = Input.GetMouseButton(1); 
 
-    public override void Attack()
+    // Senjata HANYA boleh menembak jika sedang Aiming
+    return isAiming;
+}
+
+// Contoh pembungkus fungsi menembak bawaan kamu
+private void FireBullet()
+{
+    if (currentBullet > 0 && !isReloading && fireRateTimer <= 0f)
     {
-        if (isReloading || playerMovement == null) return;
-
-        Bullet bullet = bulletPool.Get();
-        bullet.transform.position = firePoint.position;
-
-        // Hitung arah dari moncong ke target mouse
-        Vector3 targetPos = playerMovement.GetMouseTargetPosition;
-        targetPos.y = firePoint.position.y; // Samakan tinggi Y
-
-        Vector3 shootDirection = (targetPos - firePoint.position).normalized;
-
-        // Paksa peluru menghadap ke arah tembakan yang benar
-        bullet.transform.rotation = Quaternion.LookRotation(shootDirection);
-
+        // ... Jalankan logika Pooling Bullet bawaan kamu yang sudah ada ...
+        // Bullet bulletInstance = bulletPool.Get();
+        
         currentBullet--;
+        fireRateTimer = 1f / fireRate;
+        Debug.Log("BOOM! Berhasil menembak karena klik kanan ditahan.");
+    }
+}
+
+    public bool CanFire()
+    {
+        return !isReloading && currentBullet > 0 && fireRateTimer <= 0f;
+    }
+
+    public override bool CanAttack()
+    {
+        return CanFire();
+    }
+
+    public void ConsumeBullet()
+    {
+        currentBullet--;
+
+        fireRateTimer = fireRate;
+
         if (currentBullet <= 0)
         {
             reloadCoroutine = StartCoroutine(ReloadCoroutine());
         }
+    }
+
+public override void Attack()
+{
+    if (!CanFire() || playerMovement == null) return;
+
+    Bullet bullet = bulletPool.Get();
+    bullet.transform.position = firePoint.position;
+
+    Vector3 targetPos = playerMovement.GetMouseTargetPosition;
+    targetPos.y = firePoint.position.y; // Menyamakan tinggi agar peluru tidak menukik/menanjak
+
+    Vector3 shootDirection = (targetPos - firePoint.position).normalized;
+    bullet.transform.rotation = Quaternion.LookRotation(shootDirection);
+
+    base.SpawnShootVFX();
+
+    // --- LOGIKA KALKULASI BUFF DAMAGE RANGE SESUAI MATRIKS STAT ---
+    int baseWeaponDamage = (weaponData != null) ? weaponData.damage : 10;
+    int finalPeluruDamage = baseWeaponDamage;
+
+    // 1. Cari komponen PlayerAttack di Parent GameObject (Player)
+    PlayerAttack playerAttack = GetComponentInParent<PlayerAttack>();
+    if (playerAttack != null)
+    {
+        // 2. Ambil nilai permanentDamageBuff dari PlayerAttack
+        int buffDmg = playerAttack.GetPermanentDamageBuff();
+
+        // 3. Jalankan rumus jika ada buff damage yang aktif dan magazineSize valid
+        if (buffDmg > 0 && magazineSize > 0)
+        {
+            float setengahMagazine = (float)magazineSize / 2f;
+            finalPeluruDamage += Mathf.RoundToInt((float)buffDmg / setengahMagazine);
+        }
+    }
+
+    // 4. Kirim hasil kalkulasi damage yang sudah mencakup buff ke peluru
+    bullet.Setup(20f, finalPeluruDamage); 
+
+    ConsumeBullet();
+}
+
+    private void OnDisable()
+    {
+        // Jika senjata dihancurkan/dibuang saat reload, amankan statenya
+        if (reloadCoroutine != null)
+        {
+            StopCoroutine(reloadCoroutine);
+            reloadCoroutine = null;
+        }
+
+        // RESET UTAMA: Jika dibuang, paksa senjata dalam kondisi siap pakai saat diambil lagi
+        isReloading = false;
+        remainingReloadTime = 0f;
     }
 
     public void ResetReloadState()
@@ -127,19 +190,24 @@ public class HandCannon : Weapon
         {
             StopCoroutine(reloadCoroutine);
             reloadCoroutine = null;
-            Debug.Log($"Reload paused. Sisa waktu: {remainingReloadTime:F1}s");
+            Debug.Log($"Reload dipause. Sisa waktu: {remainingReloadTime:F1}s");
         }
-
-        // Matikan laser saat senjata diganti/dimatikan
-        if (laserLineRenderer != null) laserLineRenderer.enabled = false;
     }
 
     public override void OnWeaponActivate()
     {
+        // Jika peluru kosong dan sedang tidak reload, paksa reload baru
+        if (currentBullet <= 0 && !isReloading)
+        {
+            reloadCoroutine = StartCoroutine(ReloadCoroutine());
+            return;
+        }
+
+        // Resume reload yang tertunda
         if (isReloading && reloadCoroutine == null && remainingReloadTime > 0)
         {
             reloadCoroutine = StartCoroutine(ReloadCoroutineWithRemainingTime(remainingReloadTime));
-            Debug.Log($"Reload resumed. Sisa waktu: {remainingReloadTime:F1}s");
+            Debug.Log($"Reload dilanjutkan. Sisa waktu: {remainingReloadTime:F1}s");
         }
     }
 
@@ -148,7 +216,13 @@ public class HandCannon : Weapon
         isReloading = true;
         remainingReloadTime = reloadTime;
         Debug.Log("Reloading... " + reloadTime + "s");
-        yield return new WaitForSeconds(remainingReloadTime);
+
+        while (remainingReloadTime > 0f)
+        {
+            remainingReloadTime -= Time.deltaTime;
+            yield return null; // Tunggu sampai frame berikutnya
+        }
+
         CompleteReload();
     }
 
@@ -157,7 +231,13 @@ public class HandCannon : Weapon
         isReloading = true;
         remainingReloadTime = remainingTime;
         Debug.Log($"Reloading resumed... {remainingTime:F1}s");
-        yield return new WaitForSeconds(remainingReloadTime);
+
+        while (remainingReloadTime > 0f)
+        {
+            remainingReloadTime -= Time.deltaTime;
+            yield return null;
+        }
+
         CompleteReload();
     }
 
@@ -170,7 +250,7 @@ public class HandCannon : Weapon
         Debug.Log("Reloaded!");
     }
 
-    // OBJECT POOL CALLBACKS
+    //pooled object
 
     private Bullet CreateBullet()
     {
@@ -192,5 +272,15 @@ public class HandCannon : Weapon
     private void OnDestroyPoolObject(Bullet bullet)
     {
         Destroy(bullet.gameObject);
+    }
+
+    public override float GetCooldownPercentage()
+    {
+        if (isReloading && reloadTime > 0f)
+        {
+            // Menghitung persentase sisa reload (1 = baru mulai reload, 0 = selesai)
+            return remainingReloadTime / reloadTime;
+        }
+        return 0f;
     }
 }

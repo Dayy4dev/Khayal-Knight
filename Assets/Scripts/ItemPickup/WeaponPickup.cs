@@ -36,6 +36,7 @@ public class WeaponPickup : MonoBehaviour
     // Properties
     // -------------------------------------------------------------------------
 
+    [HideInInspector] public string customRarity = "";
     public WeaponData Data => weaponData;
     public bool IsDropped => isDropped;
 
@@ -80,6 +81,28 @@ public class WeaponPickup : MonoBehaviour
     public void OnPickedUp()
     {
         TogglePrompt(false);
+
+        // --- SUNTIKAN INFO RARITY SEBELUM MASUK INVENTORY ---
+        if (weaponData != null && !string.IsNullOrEmpty(customRarity))
+        {
+            weaponData.overrideRarity = customRarity;
+        }
+
+        // ---- TAMBAHKAN KODE INI ----
+        if (TutorialManager.Instance != null && weaponData != null)
+        {
+
+            // Mengecek ID atau nama dari WeaponData Anda
+            if (weaponData.name.Contains("Sword"))
+            {
+                TutorialManager.Instance.sudahAmbilPedang = true;
+            }
+            else if (weaponData.name.Contains("Cannon"))
+            {
+                TutorialManager.Instance.sudahAmbilMeriam = true;
+            }
+        }
+        // ----------------------------
         Destroy(gameObject);
     }
 

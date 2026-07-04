@@ -1,188 +1,317 @@
 using UnityEngine;
+using System;
 
+[AddComponentMenu("Player/Player Attack")]
 public class PlayerAttack : MonoBehaviour
 {
-    // -------------------------------------------------------------------------
-    // Inspector
-    // -------------------------------------------------------------------------
+    [Header("Combo Settings")]
+    [Tooltip("Jeda waktu maksimal (detik) antar hit agar combo tidak ter-reset")]
+    [SerializeField] private float comboResetDuration = 1.0f;
+
+    [Header("Knockback Settings")]
+    [SerializeField] private bool enableUnarmedKnockback = true;
+    [SerializeField] private bool applyVerticalForceToUnarmed = false;
+    [SerializeField] private bool enableSwordKnockback = false;
+    [SerializeField] private bool enableHammerKnockback = true;
 
     [Header("References")]
-    [SerializeField] private WeaponHitbox weaponHitbox;
+    [SerializeField] private PlayerHealth playerHealth;
 
-    // -------------------------------------------------------------------------
-    // State
-    // -------------------------------------------------------------------------
+    [Header("Audio Settings")]
+    [SerializeField] private AudioSource attackAudioSource;
+    [Tooltip("Masukkan 3 sound untuk Sword (Hit 1, Hit 2, Hit 3) secara berurutan")]
+    [SerializeField] private AudioClip[] swordSounds = new AudioClip[3];
+    [Tooltip("Masukkan 3 sound untuk Hammer (Hit 1, Hit 2, Hit 3) secara berurutan")]
+    [SerializeField] private AudioClip[] hammerSounds = new AudioClip[3];
+    [Tooltip("Masukkan sound tembakan khusus untuk HandCannon")]
+    [SerializeField] private AudioClip[] handCannonSound = new AudioClip[3];
+
+    private int currentComboHit = 0;
+    private float lastAttackTime = 0f;
 
     private WeaponData currentWeaponData;
-    [Header("Ranged Setup")]
-[SerializeField] private GameObject bulletPrefab; // Tarif prefab Bullet.cs kamu ke sini nanti
-[SerializeField] private Transform firePoint;     // Ujung laras tembakan HandCannon
+    private Weapon activeWeaponComponent;
+    private WeaponHitbox weaponHitbox;
+    private int permanentDamageBuff = 0;
 
-    private int   attackDamage;
-    private float attackDuration;
-    private float attackCooldown;
-    private float knockbackForce;
-    private float knockbackDuration;
+    public event Action<string> OnWeaponEquipped;
 
-    private float attackTimer;
-    private float cooldownTimer;
-    private bool  isAttacking;
-    private bool  isArmed; // false = unarmed, input attack diabaikan
+    public event Action<int> OnAttackExecuted;
 
-    // -------------------------------------------------------------------------
-    // Unity Lifecycle
-    // -------------------------------------------------------------------------
+    public event Action OnHeavyImpactExecuted;
 
-    void Update()
+    void Awake()
     {
-        TickAttack();
-        TickCooldown();
-        HandleInput();
-    }
-
-    // -------------------------------------------------------------------------
-    // Public API
-    // -------------------------------------------------------------------------
-
-    /// <summary>
-    /// Dipanggil PlayerInventory saat slot aktif berubah.
-    /// data == null  →  Unarmed (tidak bisa attack)
-    /// data != null  →  Equipped weapon
-    /// </summary>
-  public void EquipWeaponData(WeaponData data)
-{
-    EndAttack(); // Menghentikan serangan sebelumnya jika ada
-
-    currentWeaponData = data;
-    isArmed           = data != null;
-
-    if (isArmed)
-    {
-        attackDamage      = data.damage;
-        attackDuration    = data.attackDuration;
-        attackCooldown    = data.attackCooldown;
-        knockbackForce    = data.knockbackForce;
-        knockbackDuration = data.knockbackDuration;
+        if (playerHealth == null)
+            playerHealth = GetComponent<PlayerHealth>();
         
-        Debug.Log($"[PlayerAttack] Berhasil Sinkron Data: {data.weaponName}");
+        // Auto-assign AudioSource jika lupa ditarik di Inspector
+        if (attackAudioSource == null)
+            attackAudioSource = GetComponent<AudioSource>();
     }
-    else
+
+    public void EquipWeapon(WeaponData data, Weapon weaponComponent)
     {
-        Debug.Log("[PlayerAttack] Tidak memegang senjata (Unarmed)");
+        currentWeaponData = data;
+        activeWeaponComponent = weaponComponent;
+        ResetCombo();
+
+        string category = GetWeaponCategory(data);
+        OnWeaponEquipped?.Invoke(category);
     }
-}
-    // TAMBAHKAN fungsi baru ini di dalam kelas PlayerAttack:
-public void SetWeaponHitbox(WeaponHitbox newHitbox)
+
+    public void SetWeaponHitbox(WeaponHitbox hitbox)
+    {
+        weaponHitbox = hitbox;
+    }
+
+    public void ApplyPermanentDamageBuff(int amount)
+    {
+        permanentDamageBuff += amount;
+    }
+
+    public Weapon GetActiveWeapon()
+    {
+        return activeWeaponComponent;
+    }
+
+    public void ResetCombo()
+    {
+        currentComboHit = 0;
+    }
+
+    public int GetCurrentComboHit()
+    {
+        return currentComboHit;
+    }
+
+   void Update()
 {
-    this.weaponHitbox = newHitbox;
+    // Jika game sedang dipause, jangan panggil serangan
+    if (GameManager.Instance != null && !GameManager.Instance.IsPlaying)
+        return;
+
+    if (Input.GetMouseButtonDown(0))
+    {
+        Weapon activeWeapon = GetActiveWeapon();
+
+        // Semua senjata selain HandCannon harus aim dulu
+        if (!(activeWeapon is HandCannon))
+        {
+            if (!Input.GetMouseButton(1))
+            {
+                Debug.Log("[PlayerAttack] Harus Aim (Mouse Kanan) terlebih dahulu!");
+                return;
+            }
+        }
+        else
+        {
+            // HandCannon tetap memakai sistemnya sendiri
+            HandCannon handCannon = (HandCannon)activeWeapon;
+
+            if (!handCannon.CanShoot())
+            {
+                Debug.Log("[PlayerAttack] Serangan dibatalkan karena player tidak menahan klik kanan!");
+                return;
+            }
+        }
+
+        ExecuteAttack();
+    }
 }
 
-    public void ApplyKnockback(GameObject target)
+   private void ExecuteAttack()
     {
-        Vector3 dir = (target.transform.position - transform.position).normalized;
-        dir.y = 0f;
+        if (playerHealth != null && playerHealth.IsDead) return;
 
-        if (target.TryGetComponent<IKnockbackable>(out IKnockbackable kb))
-            kb.TakeKnockback(dir, knockbackForce, knockbackDuration);
-        else if (target.TryGetComponent<Rigidbody>(out Rigidbody rb))
-            rb.AddForce(dir * knockbackForce, ForceMode.Impulse);
-    }
+        if (activeWeaponComponent != null && !activeWeaponComponent.CanAttack()) return;
 
-    // -------------------------------------------------------------------------
-    // Private
-    // -------------------------------------------------------------------------
+        // 2. CEK COMBO COOLDOWN — jangan advance combo jika animasi sebelumnya
+        //    masih dalam cooldown (mencegah combo skip)
+        MCAnimationController animCtrl = FindFirstObjectByType<MCAnimationController>();
+        if (animCtrl != null && animCtrl.IsInComboCooldown) return;
 
-    private void HandleInput()
-    {
-        if (!isArmed) return;
-
-        // Tahan klik kanan untuk aim, klik kiri untuk attack
-        if (Input.GetMouseButton(1) && Input.GetMouseButtonDown(0))
+        // 3. ATUR COMBO TERLEBIH DAHULU SEBELUM HITBOX SENJATA AKTIF
+        float timeSinceLastAttack = Time.time - lastAttackTime;
+        if (timeSinceLastAttack > comboResetDuration)
         {
-            if (!isAttacking && cooldownTimer <= 0f)
-                StartAttack();
+            currentComboHit = 1; 
+        }
+        else
+        {
+            int maxCombo = (currentWeaponData != null) ? currentWeaponData.maxComboCount : 3;
+            currentComboHit = (currentComboHit % maxCombo) + 1;
+        }
+
+        lastAttackTime = Time.time;
+
+        string weaponName = (currentWeaponData != null) ? currentWeaponData.weaponName : "Tangan Kosong";
+        Debug.Log($"[Attack Melee] Mengayunkan {weaponName} | Combo Hit: {currentComboHit}");
+
+        // Notify animation system — fires for EVERY click, even when combo value wraps
+        OnAttackExecuted?.Invoke(currentComboHit);
+
+        // 4. JALANKAN LOGIKA SERANGAN SENJATA
+        if (activeWeaponComponent != null)
+        {
+            activeWeaponComponent.Attack(); 
+        }
+
+        // 5. AKTIFKAN HITBOX SENJATA PALING TERAKHIR AGAR MEMBACA COMBO YANG SUDAH UP-TO-DATE
+        if (weaponHitbox != null)
+        {
+            weaponHitbox.ActivateHitbox();
         }
     }
-
-    private void TickAttack()
+    private void PlayAttackSound()
     {
-        if (!isAttacking) return;
+        if (attackAudioSource == null || currentWeaponData == null) return;
 
-        attackTimer -= Time.deltaTime;
-        if (attackTimer <= 0f)
-            EndAttack();
-    }
-
-    private void TickCooldown()
-    {
-        if (cooldownTimer > 0f)
-            cooldownTimer -= Time.deltaTime;
-    }
-
-    
-
-private void StartAttack()
-{
-    isAttacking   = true;
-    attackTimer   = attackDuration;
-    cooldownTimer = attackCooldown;
-
-    // CEK: Apakah senjata yang dipegang saat ini adalah HandCannon?
-    if (currentWeaponData != null && (currentWeaponData.weaponName == "Hand_Cannon" || currentWeaponData.weaponName == "HandCannon"))
-    {
-        // PANGGIL fungsi menembak bawaan asli kamu di sini!
-        // Contoh nama fungsi menembak aslimu (sesuaikan jika namanya berbeda):
-        FireRangedWeapon(); 
+        string category = GetWeaponCategory(currentWeaponData);
+        AudioClip clipToPlay = null;
         
-        Debug.Log("[PlayerAttack] HandCannon menembak!");
-    }
-    else
-    {
-        // JIKA BUKAN HANDCANNON (Berarti ToyHammer / Melee)
-        if (weaponHitbox == null)
+        // Index array untuk combo melee (Sword / Hammer)
+        int soundIndex = Mathf.Clamp(currentComboHit - 1, 0, 2);
+
+        if (category == "Sword")
         {
-            Debug.LogWarning("[PlayerAttack] WeaponHitbox belum terpasang untuk senjata Melee!");
+            if (swordSounds != null && soundIndex < swordSounds.Length)
+                clipToPlay = swordSounds[soundIndex];
+        }
+        else if (category == "Hammer")
+        {
+            if (hammerSounds != null && soundIndex < hammerSounds.Length)
+                clipToPlay = hammerSounds[soundIndex];
+        }
+        else if (category == "Cannon") // <--- TAMBAHKAN LOGIKA INI UNTUK HANDCANNON
+        {
+            if (handCannonSound != null && soundIndex < handCannonSound.Length)
+                clipToPlay = handCannonSound[soundIndex];
+        }
+
+        if (clipToPlay != null)
+        {
+            attackAudioSource.PlayOneShot(clipToPlay);
+        }
+    }
+    public void CalculateHitEffects(out int finalDamage, out float stunDuration)
+    {
+        // --- PENGAMAN UTAMA: Jika data senjata null, langsung hitung Tangan Kosong + Buff ---
+        if (currentWeaponData == null)
+        {
+            finalDamage = currentWeaponData.damage + (permanentDamageBuff / currentWeaponData.maxComboCount); 
+            stunDuration = 0.3f;
+            Debug.LogWarning("[PlayerAttack] currentWeaponData null! Menggunakan rumus Tangan Kosong + Buff.");
             return;
         }
-        weaponHitbox.Activate(attackDamage);
-    }
-}
-// Tambahkan fungsi baru ini di bawah StartAttack
-private void FireRangedWeapon()
-{
-    if (bulletPrefab == null)
-    {
-        Debug.LogError("[PlayerAttack] Bullet Prefab belum dimasukkan di Inspector!");
-        return;
-    }
 
-    // Tentukan posisi menembak (pakai firePoint, kalau kosong pakai posisi player agak maju)
-    Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position + transform.forward * 1f;
-    Quaternion spawnRot = transform.rotation;
+        // Ambil kategori secara aman
+        string category = GetWeaponCategory(currentWeaponData);
 
-    // Spawn peluru ke dunia game
-    GameObject bulletObj = Instantiate(bulletPrefab, spawnPos, spawnRot);
-
-    // Cari komponen Bullet di objek peluru tersebut, lalu beri kecepatan & damage
-    if (bulletObj.TryGetComponent<Bullet>(out Bullet bullet))
-    {
-        // Sesuaikan parameter ini dengan apa yang ada di script Bullet.cs milikmu
-        // Misal biasanya: bullet.Setup(currentWeaponData.speed, attackDamage);
-        
-        // Catatan: Jika script Bullet kamu menggunakan Rigidbody untuk bergerak, kodenya:
-        if (bulletObj.TryGetComponent<Rigidbody>(out Rigidbody rb))
+        // --- RUMUS MELEE UNTUK CANNON/HANDCANNON ---
+        if (category == "Cannon")
         {
-            rb.linearVelocity = transform.forward * currentWeaponData.speed;
+            finalDamage = currentWeaponData.damage + (permanentDamageBuff / currentWeaponData.maxComboCount*2);
+            stunDuration = 0f; 
+            return;
+        }
+
+        // --- RUMUS MELEE UNTUK SWORD (BALLOONSWORD) & HAMMER ---
+        int baseTotal = currentWeaponData.damage + (permanentDamageBuff / currentWeaponData.maxComboCount);
+        finalDamage = baseTotal;
+        stunDuration = 0.3f;
+
+        if (category == "Sword" && currentComboHit == 3)
+        {
+            finalDamage = Mathf.RoundToInt(baseTotal * 1.20f);
+        }
+        else if (category == "Hammer" && currentComboHit == 2)
+        {
+            finalDamage = Mathf.RoundToInt(baseTotal * 1.25f);
+            stunDuration = 0.8f;
+        }
+        else if (category == "Hammer" && currentComboHit == 3)
+        {
+            finalDamage = Mathf.RoundToInt(baseTotal * 1.50f);
+            stunDuration = 1.0f;
         }
     }
     
-    Debug.Log($"[PlayerAttack] Menembakkan {currentWeaponData.weaponName}!");
-}
-
-    private void EndAttack()
+    public int GetPermanentDamageBuff()
     {
-        isAttacking = false;
-        weaponHitbox?.Deactivate();
+        return permanentDamageBuff;
     }
-    
+
+    private string GetWeaponCategory(WeaponData data)
+    {
+        if (data == null || string.IsNullOrEmpty(data.weaponName)) return "Unarmed";
+        string nameLower = data.weaponName.ToLower();
+
+        if (nameLower.Contains("sword") || nameLower.Contains("blade") || nameLower.Contains("calibur"))
+            return "Sword";
+        if (nameLower.Contains("hammer") || nameLower.Contains("mallet"))
+            return "Hammer";
+        if (nameLower.Contains("cannon") || nameLower.Contains("blaster"))
+            return "Cannon";
+        if (nameLower.Contains("unarmed") || nameLower.Contains("punch") || nameLower.Contains("fist"))
+            return "Unarmed";
+
+        return "Unarmed";
+    }
+
+    public WeaponData GetCurrentWeaponData()
+    {
+        return currentWeaponData; 
+    }
+
+    public void ApplyKnockback(GameObject target, float verticalForce = 0f)
+    {
+        if (target == null) return;
+
+        string category = GetWeaponCategory(currentWeaponData);
+        
+        if (category == "Sword" && !enableSwordKnockback) return;
+        if (category == "Hammer" && !enableHammerKnockback) return;
+        if (category == "Unarmed" && !enableUnarmedKnockback) return;
+
+        if (category == "Unarmed" && !applyVerticalForceToUnarmed)
+        {
+            verticalForce = 0f;
+        }
+
+        float force = 5f;
+        if (category == "Hammer") force = 8f; 
+
+        // Try NavMesh-aware knockback first
+        if (target.TryGetComponent<EnemyKnockback>(out var enemyKb))
+        {
+            if (verticalForce > 0f)
+                enemyKb.ApplyHeavyKnockback(transform.position, force, verticalForce);
+            else
+                enemyKb.ApplyKnockback(transform.position, force);
+            return;
+        }
+
+        // Fallback for non-enemies (e.g. breakable props with Rigidbody)
+        Rigidbody targetRb = target.GetComponent<Rigidbody>();
+        if (targetRb != null)
+        {
+            Vector3 knockbackDirection = (target.transform.position - transform.position);
+            knockbackDirection.y = 0; 
+            if (knockbackDirection.sqrMagnitude < 0.001f) knockbackDirection = transform.forward;
+            knockbackDirection.Normalize();
+
+            targetRb.AddForce(knockbackDirection * force, ForceMode.VelocityChange);
+
+            if (verticalForce > 0f)
+            {
+                targetRb.AddForce(Vector3.up * verticalForce, ForceMode.VelocityChange);
+            }
+        }
+    }
+
+    public void FireHeavyImpactEvent()
+    {
+        OnHeavyImpactExecuted?.Invoke();
+    }
 }

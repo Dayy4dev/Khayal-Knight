@@ -27,7 +27,10 @@ public class CutoutObject : MonoBehaviour
 
         for (int i = 0; i < hitObjects.Length; ++i)
         {
-            Material[] materials = hitObjects[i].transform.GetComponent<Renderer>().materials;
+            Renderer renderer = hitObjects[i].transform.GetComponent<Renderer>();
+            if (renderer == null) continue;
+            
+            Material[] materials = renderer.materials;
 
             for(int m = 0; m < materials.Length; ++m)
             {

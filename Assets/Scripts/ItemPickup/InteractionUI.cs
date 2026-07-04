@@ -7,13 +7,13 @@ public class InteractionUI : MonoBehaviour
     [SerializeField] private GameObject uiPanel; // Drag Game Object Teks/Panel UI ke sini
     [SerializeField] private TMP_Text promptText; // Drag komponen Text ke sini
 
-    void OnEnable()
+    void Awake()
     {
         if (playerInventory != null)
             playerInventory.onNearestPickupChanged.AddListener(UpdateUI);
     }
 
-    void OnDisable()
+    void OnDestroy()
     {
         if (playerInventory != null)
             playerInventory.onNearestPickupChanged.RemoveListener(UpdateUI);
@@ -21,31 +21,20 @@ public class InteractionUI : MonoBehaviour
 
     private void UpdateUI(WeaponPickup nearestPickup)
     {
-        // FIX LOGIC: Cek apakah komponen dan GameObject-nya benar-benar ada (tidak null/destroyed)
-        if (nearestPickup != null && nearestPickup.gameObject != null)
+        if (nearestPickup != null)
         {
-            // Nyalakan UI global di layar player
+            // Nyalakan UI Panel (Background + Teks)
             if (uiPanel != null) uiPanel.SetActive(true);
             
+            // Set teks statis tanpa nama senjata
             if (promptText != null)
             {
-                // TIPS Tambahan: Kamu bisa memunculkan nama senjatanya secara dinamis jika mau!
-                if (nearestPickup.Data != null)
-                {
-                    promptText.text = $"[F] Pick Up {nearestPickup.Data.weaponName}";
-                }
-                else
-                {
-                    promptText.text = "[F] To Pick Up";
-                }
+                promptText.text = "[F] Pick Up";
             }
-
-            // Opsional: Jika senjatanya punya UI lokal sendiri, nyalakan juga
-            nearestPickup.TogglePrompt(true);
         }
         else
         {
-            // Jika tidak ada senjata terdekat ATAU senjata baru saja dihancurkan (di-pickup)
+            // Jika tidak ada senjata terdekat, matikan UI Panel
             if (uiPanel != null) uiPanel.SetActive(false);
         }
     }

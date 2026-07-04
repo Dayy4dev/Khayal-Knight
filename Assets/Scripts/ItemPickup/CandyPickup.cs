@@ -56,7 +56,7 @@ public class CandyPickup : MonoBehaviour
         if (candyData == null) return;
 
         // Deteksi player via tag atau komponen
-        if (!other.CompareTag("Player") && other.GetComponent<PlayerHealth>() == null) return;
+        if (!other.CompareTag("Player")) return;
 
         PlayerHealth health = other.GetComponent<PlayerHealth>();
         if (health == null) return;

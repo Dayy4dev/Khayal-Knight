@@ -1,132 +1,65 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-[AddComponentMenu("Spawners/Enemy Spawner")]
 public class EnemySpawner : MonoBehaviour
 {
     [Header("Spawn Settings")]
-    [Tooltip("Prefab musuh yang akan di-spawn")]
     public GameObject enemyPrefab;
-   public Transform[] spawnPoints;
+    public int spawnCount = 3;
+    public float spawnRadius = 5f; 
 
-    public float spawnRadius = 5f;
+    [Header("Layer Mask Setup")]
+    public LayerMask groundLayer;  
 
-    [Tooltip("Interval (detik) antar spawn")]
-    public float spawnInterval = 1.5f;
+    // ─── TAMBAHKAN VARIABEL INI UTK PENGAMAN ────────────────────────
+    private bool hasSpawned = false;
+    public bool HasSpawned => hasSpawned; // Properti agar bisa dibaca script lain
+    // ────────────────────────────────────────────────────────────────
 
-    [Tooltip("Jumlah maksimum enemy aktif sekaligus")]
-    public int maxActiveEnemies = 6;
-
-    [Tooltip("Jumlah total enemy yang ingin di-spawn. 0 = tak terbatas")]
-    public int totalToSpawn = 0;
-
-    [Tooltip("Mulai otomatis saat Play" )]
-    public bool autoStart = true;
-
-    private List<GameObject> activeEnemies = new List<GameObject>();
-    private Coroutine spawnRoutine;
-    private int spawnedCount = 0;
-
-    private void Start()
+    public void SpawnEnemies()
     {
-        if (autoStart)
-            StartSpawning();
-    }
+        // JIKA SUDAH PERNAH SPAWN, JANGAN JALANKAN LAGI!
+        if (hasSpawned) return; 
 
-    public void StartSpawning()
-    {
         if (enemyPrefab == null)
         {
-            Debug.LogWarning("EnemySpawner: belum assign enemyPrefab");
+            Debug.LogWarning($"[EnemySpawner] Enemy Prefab belum di-assign di {gameObject.name}!");
             return;
         }
 
-        if (spawnRoutine == null)
-            spawnRoutine = StartCoroutine(SpawnRoutine());
-    }
-
-    public void StopSpawning()
-    {
-        if (spawnRoutine != null)
+        for (int i = 0; i < spawnCount; i++)
         {
-            StopCoroutine(spawnRoutine);
-            spawnRoutine = null;
-        }
-    }
+            Vector2 randomCircle = Random.insideUnitCircle * spawnRadius;
+            Vector3 spawnPos = new Vector3(
+                transform.position.x + randomCircle.x,
+                transform.position.y,
+                transform.position.z + randomCircle.y
+            );
 
-    public void SpawnOnce()
-    {
-        TrySpawn();
-    }
+            if (Physics.Raycast(spawnPos + Vector3.up * 5f, Vector3.down, out RaycastHit hit, 10f, groundLayer))
+            {
+                spawnPos = hit.point;
+            }
 
-    private IEnumerator SpawnRoutine()
-    {
-        while (true)
-        {
-            TrySpawn();
-            yield return new WaitForSeconds(spawnInterval);
-        }
-    }
-
-    private void TrySpawn()
-    {
-        CleanupList();
-
-        if (totalToSpawn > 0 && spawnedCount >= totalToSpawn) return;
-        if (activeEnemies.Count >= maxActiveEnemies) return;
-
-        Vector3 spawnPos = GetSpawnPosition();
-        Quaternion rot = Quaternion.identity;
-
-        GameObject go = Instantiate(enemyPrefab, spawnPos, rot);
-        activeEnemies.Add(go);
-        spawnedCount++;
-    }
-
-    private Vector3 GetSpawnPosition()
-    {
-        if (spawnPoints != null && spawnPoints.Length > 0)
-        {
-            Transform t = spawnPoints[Random.Range(0, spawnPoints.Length)];
-            return t.position;
+            GameObject enemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity, transform.parent);
+            enemy.tag = "Enemy";
         }
 
-        Vector2 circle = Random.insideUnitCircle * spawnRadius;
-        Vector3 pos = transform.position + new Vector3(circle.x, 0f, circle.y);
-        return pos;
+        hasSpawned = true; // Tandai bahwa spawner ini sudah memunculkan musuh!
+        Debug.Log($"[EnemySpawner] Berhasil spawn {spawnCount} musuh di {transform.parent.name}");
     }
 
-    // Buang referensi null dari list activeEnemies
-    private void CleanupList()
-    {
-        for (int i = activeEnemies.Count - 1; i >= 0; i--)
-        {
-            if (activeEnemies[i] == null)
-                activeEnemies.RemoveAt(i);
-        }
-    }
-
-    // Opsional: panggil ini dari enemy saat mati agar spawner tahu langsung
     public void NotifyEnemyDestroyed(GameObject enemy)
     {
-        if (activeEnemies.Contains(enemy))
-            activeEnemies.Remove(enemy);
+        Debug.Log($"[EnemySpawner] Musuh {enemy.name} melaporkan kematian.");
+        if (DungeonManager.Instance != null)
+        {
+            DungeonManager.Instance.OnEnemyKilled();
+        }
     }
 
     private void OnDrawGizmosSelected()
     {
-        Gizmos.color = Color.cyan;
+        Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, spawnRadius);
-
-        if (spawnPoints != null)
-        {
-            Gizmos.color = Color.yellow;
-            foreach (var p in spawnPoints)
-            {
-                if (p == null) continue;
-                Gizmos.DrawSphere(p.position, 0.2f);
-            }
-        }
     }
 }

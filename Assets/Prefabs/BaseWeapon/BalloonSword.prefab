@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 4753903084371438013}
   - component: {fileID: 2492007672910565461}
   - component: {fileID: 8259094617559656228}
+  - component: {fileID: -6911453952373172269}
   m_Layer: 0
   m_Name: BalloonSword
   m_TagString: Untagged
@@ -128,8 +129,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4372b96f71d3a94458c5609380e774d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponHitbox
-  weaponRig: {fileID: 0}
-  hitCollider: {fileID: 8576941776436297039}
 --- !u!114 &8259094617559656228
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -142,8 +141,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e9cba6ddebad4d47b0218f571539083, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAttack
-  weaponHitbox: {fileID: 0}
-  weaponData: {fileID: 11400000, guid: 240bf721be4d2f6439e662e705654b3b, type: 2}
+  comboResetDuration: 1
+  playerHealth: {fileID: 0}
+--- !u!114 &-6911453952373172269
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1469876733770194296}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fff2c4540c980ce4480bede233d02dc6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BalloonSwordVFX
+  slashVfxPrefab: {fileID: 2177472768528519091, guid: 414e7c7f08af50e47b2def0750d8834a, type: 3}
+  offset: {x: 0, y: 1, z: 1}
+  localScale: {x: 2, y: 2, z: 2}
+  localRotation: {x: 0, y: 0, z: 0}
+  playDelay: 0
+  destroyAfter: 0.5
 --- !u!1 &4934016711351182764
 GameObject:
   m_ObjectHideFlags: 0

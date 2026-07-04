@@ -1,12 +1,15 @@
 using UnityEngine;
 
-// RoomType ada di RoomEnums.cs
-
 public class DoorController : MonoBehaviour
 {
     [Header("Door Settings")]
     public RoomType destinationRoomType;
     public bool isLocked = true;
+
+    // ─── TAMBAHKAN VARIABEL INI ──────────────────────────────────────
+    [Header("Blocker Settings")]
+    public GameObject doorBlocker; // Masukkan objek DoorBlocker ke sini di Inspector
+    // ─────────────────────────────────────────────────────────────────
 
     [Header("Visuals (Opsional)")]
     public GameObject lockedVisual;
@@ -14,6 +17,9 @@ public class DoorController : MonoBehaviour
 
     [Header("Player Detection")]
     public string playerTag = "Player";
+
+
+
 
     void Start()
     {
@@ -33,11 +39,17 @@ public class DoorController : MonoBehaviour
         Debug.Log($"[Door] Pintu ke {destinationRoomType} terbuka!");
     }
 
-    void RefreshVisual()
+   void RefreshVisual()
+{
+    if (lockedVisual != null) lockedVisual.SetActive(isLocked);
+    if (unlockedVisual != null) unlockedVisual.SetActive(!isLocked);
+    
+    if (doorBlocker != null) 
     {
-        if (lockedVisual != null) lockedVisual.SetActive(isLocked);
-        if (unlockedVisual != null) unlockedVisual.SetActive(!isLocked);
+        doorBlocker.SetActive(isLocked);
+        Debug.Log($"[Door] {gameObject.name} -> Status DoorBlocker di-set ke: {isLocked}");
     }
+}
 
     void OnTriggerEnter(Collider other)
     {

@@ -5,6 +5,10 @@ TagManager:
   serializedVersion: 3
   tags:
   - Enemy
+  - Wall
+  - Ground
+  - PartnerSpawnpoint
+  - Airplane
   layers:
   - Default
   - TransparentFX
@@ -20,7 +24,7 @@ TagManager:
   - Walls
   - Walltipu
   - PinMiniMap
-  - 
+  - Spawner
   - 
   - 
   - 

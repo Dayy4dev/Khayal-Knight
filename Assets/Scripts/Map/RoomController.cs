@@ -37,6 +37,18 @@ public class RoomController : MonoBehaviour
             LockRoom();
     }
 
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player") && roomState == RoomState.Locked)
+            ActivateRoom();
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Player") && roomState == RoomState.Locked)
+            ActivateRoom();
+    }
+
     void Update()
     {
         if (roomState == RoomState.Active && !hasCleared)
@@ -60,31 +72,46 @@ public class RoomController : MonoBehaviour
             OnRoomCleared();
     }
 
-    public void ActivateRoom()
+public void ActivateRoom()
     {
-        roomState = RoomState.Active;
+        roomState = RoomState.Active; //
 
-        foreach (var door in exitDoors)
-            if (door != null) door.LockDoor();
+        foreach (var door in exitDoors) //
+            if (door != null) door.LockDoor(); //[cite: 7]
 
-        if (combatRoom != null)
-            combatRoom.StartCombat();
-
-        if (autoDetectEnemies)
+        // ─────────────────────────────────────────────────────────────
+        // FIX: Cari komponen spawner di dalam room ini dan aktifkan
+        // ─────────────────────────────────────────────────────────────
+        EnemySpawner spawner = GetComponentInChildren<EnemySpawner>();
+        if (spawner != null)
         {
-            DetectEnemies();
-            if (enemies.Count == 0)
-                OnRoomCleared();
+            spawner.SpawnEnemies();
+        }
+        // ─────────────────────────────────────────────────────────────
+
+        if (combatRoom != null) //[cite: 7]
+            combatRoom.StartCombat(); //[cite: 7]
+
+        if (autoDetectEnemies) //[cite: 7]
+        {
+            DetectEnemies(); //[cite: 7]
+            if (enemies.Count == 0) //[cite: 7]
+                OnRoomCleared(); //[cite: 7]
         }
 
-        Debug.Log($"[Room] {roomType} aktif.");
+        Debug.Log($"[Room] {roomType} aktif."); //[cite: 7]
     }
 
     public void LockRoom()
     {
         roomState = RoomState.Locked;
         foreach (var door in exitDoors)
-            if (door != null) door.LockDoor();
+        {
+            if (door != null)
+            {
+                door.LockDoor();
+            }
+        }
     }
 
     void OnRoomCleared()

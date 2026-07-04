@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2c7051759f577d4e90bc60644040fe1, type: 3}
+  m_Name: LegendaryToyHammer
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponData
+  weaponName: SqueekHammer
+  icon: {fileID: 21300000, guid: 30ab8412c20019043b7dac3de75a76d8, type: 3}
+  overrideRarity: Legendary
+  pickupPrefab: {fileID: 9062965573063651071, guid: a16af6212ad7ac240b0eb432b16a9db4, type: 3}
+  damage: 800
+  attackDuration: 0.75
+  attackCooldown: 0.85
+  knockbackForce: 30
+  knockbackDuration: 0.2
+  maxComboCount: 3
+  meleeReloadTime: 1.5
+  defaultCapacity: 0
+  maxPoolSize: 0
+  speed: 0
+  magazineSize: 0
+  reloadTime: 0
+  fireRate: 0

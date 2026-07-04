@@ -1,84 +1,109 @@
-using System.Collections.Generic;
 using UnityEngine;
+using System;
+using System.Collections;
 
-public class WeaponHitbox : Weapon
+public class WeaponHitbox : MonoBehaviour
 {
-    [Header("Hit Detection")]
-    [SerializeField] private Collider hitCollider;
+    public event Action<GameObject> OnEnemyHit;
 
-    [Tooltip("Layer yang bisa kena damage (centang Enemy saja, jangan Player)")]
-    [SerializeField] private LayerMask targetLayers;
+    private Collider hitboxCollider;
 
-    private int damage;
-    private bool isActive;
-    private HashSet<Collider> hitThisSwing = new HashSet<Collider>();
-    private PlayerAttack playerAttack;
-
-    // -------------------------------------------------------------------------
-    // Unity Lifecycle
-    // -------------------------------------------------------------------------
-
-  // GANTI baris di dalam fungsi Awake() menjadi seperti ini:
-void Awake()
-{
-    if (hitCollider == null)
-        hitCollider = GetComponent<Collider>();
-
-    hitCollider.isTrigger = true;
-    hitCollider.enabled = false;
-
-    // FIX: Mencari ke struktur paling atas (root) dari Player kamu
-    playerAttack = GetComponentInParent<PlayerAttack>();
-    if (playerAttack == null)
+    void Awake()
     {
-        playerAttack = GameObject.FindWithTag("Player")?.GetComponent<PlayerAttack>();
-    }
-}
+        hitboxCollider = GetComponent<Collider>();
 
-    // -------------------------------------------------------------------------
-    // Weapon Overrides
-    // -------------------------------------------------------------------------
-
-    public override void Attack() => Activate(damage);
-
-    // -------------------------------------------------------------------------
-    // Public API
-    // -------------------------------------------------------------------------
-
-    public void Activate(int dmg)
-    {
-        damage = dmg;
-        isActive = true;
-        hitThisSwing.Clear();
-        hitCollider.enabled = true;
+        if (hitboxCollider != null)
+        {
+            hitboxCollider.isTrigger = true;
+            hitboxCollider.enabled = false;
+        }
+        else
+        {
+            Debug.LogError($"[WeaponHitbox] No Collider found on '{gameObject.name}'. " +
+                "OnTriggerEnter requires the collider to be on the same GameObject.");
+        }
     }
 
-    public void Deactivate()
+    public void ActivateHitbox()
     {
-        isActive = false;
-        hitCollider.enabled = false;
-        hitThisSwing.Clear();
+        StopAllCoroutines();
+        StartCoroutine(HitboxRoutine());
     }
 
-    // -------------------------------------------------------------------------
-    // Trigger
-    // -------------------------------------------------------------------------
-
-    void OnTriggerEnter(Collider other)
+    public void DeactivateHitbox()
     {
-        if (!isActive) return;
-        if (hitThisSwing.Contains(other)) return;
+        if (hitboxCollider != null)
+        {
+            hitboxCollider.enabled = false;
+        }
+    }
 
-        // FIX: hanya mengenai layer yang ada di targetLayers (misal: Enemy)
-        // Ini mencegah player kena damage dari senjatanya sendiri
-        if ((targetLayers.value & (1 << other.gameObject.layer)) == 0) return;
+    private IEnumerator HitboxRoutine()
+    {
+        if (hitboxCollider != null) hitboxCollider.enabled = true;
+        yield return new WaitForSeconds(0.2f);
+        if (hitboxCollider != null) hitboxCollider.enabled = false;
+    }
 
-        if (!other.TryGetComponent<IDamageable>(out IDamageable target)) return;
+private void OnTriggerEnter(Collider other)
+    {
+        // Cegah melukai diri sendiri atau objek sesama Player
+        if (other.CompareTag("Player")) return;
 
-        hitThisSwing.Add(other);
-        target.TakeDamage(damage);
+        IDamageable enemyHealth = other.GetComponent<IDamageable>();
 
-        if (playerAttack != null)
-            playerAttack.ApplyKnockback(other.gameObject);
+        if (enemyHealth != null)
+        {
+            int damageYangDiberikan = 0;
+
+            // --- PERBAIKAN UTAMA: Mencari PlayerAttack dari root objek tertinggi (Player) ---
+            PlayerAttack playerAttack = transform.root.GetComponentInChildren<PlayerAttack>();
+
+            if (playerAttack != null)
+            {
+                // Panggil kalkulasi terpusat (Base Damage + Buff Damage + Combo Multiplier)
+                playerAttack.CalculateHitEffects(out damageYangDiberikan, out _);
+            }
+            else
+            {
+                // Backup darurat jika PlayerAttack benar-benar tidak ada di dunia
+                BalloonSword sword = GetComponentInParent<BalloonSword>();
+                if (sword != null)
+                {
+                    damageYangDiberikan = sword.GetDamageValue();
+                }
+                else
+                {
+                    ToyHammer hammer = GetComponentInParent<ToyHammer>();
+                    if (hammer != null)
+                    {
+                        // Anda bisa menambahkan fungsi GetDamageValue() di ToyHammer jika dibutuhkan
+                        damageYangDiberikan = 35; 
+                    }
+                }
+            }
+
+            // Pengaman akhir: Jika damage masih 0 atau minus, beri nilai default 10
+            if (damageYangDiberikan <= 0) damageYangDiberikan = 10;
+
+            // 1. Berikan damage hasil kalkulasi buff ke musuh!
+            enemyHealth.TakeDamage(damageYangDiberikan);
+            Debug.Log($"[Hitbox Melee] Berhasil memukul {other.name} | Total Damage + Buff: {damageYangDiberikan}");
+
+            // Notify listeners (e.g. ToyHammer for HeavyImpact dedup)
+            OnEnemyHit?.Invoke(other.gameObject);
+
+            // 2. Berikan efek dorongan (Knockback)
+            if (playerAttack != null)
+            {
+                playerAttack.ApplyKnockback(other.gameObject);
+            }
+
+            // 3. Berikan efek Stun jika ada komponen handler stun di musuh
+            if (other.TryGetComponent<EnemyStunHandler>(out var stunHandler))
+            {
+                stunHandler.TriggerStun(0.3f); 
+            }
+        }
     }
 }

@@ -11,9 +11,11 @@ public class Bullet : MonoBehaviour
     private IObjectPool<Bullet> originPool;
     private bool hasHit = false;
 
-    [Header("References")]
-    [SerializeField] private WeaponData weaponData;
-
+    public void Setup(float bulletSpeed, int damage)
+{
+    this.speed = bulletSpeed;
+    this.damageAmount = damage; // Menggunakan damage asli dari Cannon
+}
     public void SetPool(IObjectPool<Bullet> pool)
     {
         originPool = pool;
@@ -23,20 +25,10 @@ public class Bullet : MonoBehaviour
     {
         currentLifetime = lifetime;
         hasHit = false;
-
-        // Diambil di OnEnable bukan Start, biar bener tiap kali bullet di-reuse dari pool
-        if (weaponData != null)
-        {
-            speed = weaponData.speed;
-            damageAmount = weaponData.damage;
-        }
     }
 
     private void Update()
     {
-        // FIX: Tambahkan Space.World di dalam Translate
-        // Ini memaksa peluru bergerak lurus secara absolut berdasarkan arah hadap globalnya, 
-        // bebas dari distorsi rotasi internal parent/senjata.
         transform.Translate(transform.forward * speed * Time.deltaTime, Space.World);
 
         currentLifetime -= Time.deltaTime;

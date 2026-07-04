@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2c7051759f577d4e90bc60644040fe1, type: 3}
+  m_Name: LegendaryBalloonSword
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponData
+  weaponName: BalloonSword
+  icon: {fileID: 21300000, guid: 7f613faf5cf863e4b9d4dfa997a4ca38, type: 3}
+  overrideRarity: 
+  pickupPrefab: {fileID: 2594508773250980820, guid: 085c57c8f1ec2594188c50ab7e03430e, type: 3}
+  damage: 500
+  attackDuration: 0.5
+  attackCooldown: 0.3
+  knockbackForce: 10
+  knockbackDuration: 0.2
+  maxComboCount: 3
+  meleeReloadTime: 0.75
+  defaultCapacity: 0
+  maxPoolSize: 0
+  speed: 0
+  magazineSize: 0
+  reloadTime: 0
+  fireRate: 0
