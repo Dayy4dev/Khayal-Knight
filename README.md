@@ -1,4 +1,4 @@
-# ⚔️ Khayal Knight (Concept Name)
+# ⚔️ Khayal Knight
 > **GAMESEED 2026 Repository**
 
 ---
@@ -74,3 +74,127 @@ Level dirancang mengalir dengan transisi ruangan yang menantang, terinspirasi da
 * **Gaya Animasi & Art Direction:** *Hi-Fi Rush*, *Bomb Rush Cyberfunk*, *Disco Elysium*, *Mega Man Legends*
 
 ---
+
+## 🤝 Contributors
+**Khayal Knight** would not exist without the passion, creativity, and teamwork of every member. Thank you for bringing this game to life and making this journey unforgettable.
+
+<table>
+<tr>
+<td align="center">
+<a href="https://github.com/aerodiby">
+<img src="https://github.com/aerodiby.png" width="100" style="border-radius:50%;" alt="aerodiby">
+</a><br>
+<b>Mohammad Safaraz Lasono</b><br>
+<a href="https://github.com/aerodiby">@aerodiby</a><br>
+<sub>Project Leader</sub>
+</td>
+
+<td align="center">
+<a href="https://github.com/Ken-JN">
+<img src="https://github.com/Ken-JN.png" width="100" style="border-radius:50%;" alt="Ken-JN">
+</a><br>
+<b>Ahmad Kenzie Javas Niscala</b><br>
+<a href="https://github.com/Ken-JN">@Ken-JN</a><br>
+<sub>Programmer</sub>
+</td>
+
+<td align="center">
+<a href="https://github.com/Dayy4dev">
+<img src="https://github.com/Dayy4dev.png" width="100" style="border-radius:50%;" alt="Dayy4dev">
+</a><br>
+<b>Muhammad Dafi Ristiansyah</b><br>
+<a href="https://github.com/Dayy4dev">@Dayy4dev</a><br>
+<sub>Programmer</sub>
+</td>
+
+<td align="center">
+<a href="https://github.com/Bhumm579">
+<img src="https://github.com/Bhumm579.png" width="100" style="border-radius:50%;" alt="Bhumm579">
+</a><br>
+<b>Bhumi Aqiel Magrabhi</b><br>
+<a href="https://github.com/Bhumm579">@Bhumm579</a><br>
+<sub>Programmer</sub>
+</td>
+</tr>
+
+<tr>
+<td align="center">
+<a href="https://github.com/Neal982">
+<img src="https://github.com/Neal982.png" width="100" style="border-radius:50%;" alt="Neal982">
+</a><br>
+<b>Daneal Rahmat Magrabi</b><br>
+<a href="https://github.com/Neal982">@Neal982</a><br>
+<sub>UI Designer</sub>
+</td>
+
+<td align="center">
+<a href="https://github.com/Kaisar-Qin">
+<img src="https://github.com/Kaisar-Qin.png" width="100" style="border-radius:50%;" alt="Kaisar-Qin">
+</a><br>
+<b>Kaisar Deno Ankabut</b><br>
+<a href="https://github.com/Kaisar-Qin">@Kaisar-Qin</a><br>
+<sub>UI Designer</sub>
+</td>
+
+<td align="center">
+<a href="https://github.com/elelelwelwelwel">
+<img src="https://github.com/elelelwelwelwel.png" width="100" style="border-radius:50%;" alt="elelelwelwelwel">
+</a><br>
+<b>Samuel Prasta Aditya</b><br>
+<a href="https://github.com/elelelwelwelwel">@elelelwelwelwel</a><br>
+<sub>UI Designer</sub>
+</td>
+
+<td align="center">
+<a href="https://github.com/mantapujiwa2009">
+<img src="https://github.com/mantapujiwa2009.png" width="100" style="border-radius:50%;" alt="mantapujiwa2009">
+</a><br>
+<b>Syabill Bramaditya Hyudwiekusuma</b><br>
+<a href="https://github.com/mantapujiwa2009">@mantapujiwa2009</a><br>
+<sub>Game Director</sub>
+</td>
+</tr>
+
+<tr>
+<td align="center">
+<img src="https://ui-avatars.com/api/?name=Zidane+Khalid+Wibowo&background=0D8ABC&color=fff" width="100" style="border-radius:50%;" alt="Zidane"><br>
+<b>Zidane Khalid Wibowo</b><br>
+<sub>Character Artist</sub>
+</td>
+
+<td align="center">
+<img src="https://ui-avatars.com/api/?name=Azka+Naufal+Daniswara&background=0D8ABC&color=fff" width="100" style="border-radius:50%;" alt="Azka"><br>
+<b>Azka Naufal Daniswara</b><br>
+<sub>Character Artist</sub>
+</td>
+
+<td align="center">
+<img src="https://ui-avatars.com/api/?name=Danish+Arfa+Safaraz&background=0D8ABC&color=fff" width="100" style="border-radius:50%;" alt="Danish"><br>
+<b>Danish Arfa Safaraz</b><br>
+<sub>Props Artist</sub>
+</td>
+
+<td align="center">
+<img src="https://ui-avatars.com/api/?name=Gabriel+Vitto+Dafin+Alvaro&background=0D8ABC&color=fff" width="100" style="border-radius:50%;" alt="Gabriel"><br>
+<b>Gabriel Vitto Dafin Alvaro</b><br>
+<sub>Props Artist</sub>
+</td>
+</tr>
+
+<tr>
+<td align="center">
+<img src="https://ui-avatars.com/api/?name=Abhirama+Elang+Bayunatha&background=0D8ABC&color=fff" width="100" style="border-radius:50%;" alt="Abhirama"><br>
+<b>Abhirama Elang Bayunatha</b><br>
+<sub>VFX Artist</sub>
+</td>
+
+<td align="center">
+<img src="https://ui-avatars.com/api/?name=Ikram+Anandra+Maulawi&background=0D8ABC&color=fff" width="100" style="border-radius:50%;" alt="Ikram"><br>
+<b>Ikram Anandra Maulawi</b><br>
+<sub>Audio Artist</sub>
+</td>
+
+<td></td>
+<td></td>
+</tr>
+</table>
